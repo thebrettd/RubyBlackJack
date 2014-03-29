@@ -17,14 +17,14 @@ describe Player do
 
   it 'should have an empty hand to start' do
     player = Player.new('Test Player')
-    player.hand.empty?.should eq(true)
+    player.hands.empty?.should eq(true)
   end
 
   it 'should be able to start a new empty hand' do
     player = Player.new('Test Player')
-    player.new_hand
-    player.hand.nil?.should eq(false)
-    player.hand.size.should eq(0)
+    player.new_hands
+    player.hands.nil?.should eq(false)
+    player.hands.size.should eq(0)
   end
 
   it 'should have a nil wager' do

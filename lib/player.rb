@@ -3,7 +3,7 @@ class Player
   def initialize(name)
     @name = name
     @bankroll = 1000
-    @hand = []
+    @hands = []
     @wager = nil
   end
 
@@ -15,12 +15,12 @@ class Player
     @bankroll
   end
 
-  def hand
-    @hand
+  def hands
+    @hands
   end
 
-  def new_hand
-    @hand = []
+  def new_hands
+    @hands = []
   end
 
   def current_wager
@@ -33,7 +33,7 @@ class Player
   end
 
   def hit(card)
-    @hand.push(card)
+    @hands.push(card)
   end
 
 end
