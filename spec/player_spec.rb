@@ -15,9 +15,9 @@ describe Player do
     player.bankroll.should eq(1000)
   end
 
-  it 'should have a nil hand to start' do
+  it 'should have an empty hand to start' do
     player = Player.new('Test Player')
-    player.hand.nil?.should eq(true)
+    player.hand.empty?.should eq(true)
   end
 
   it 'should be able to start a new empty hand' do

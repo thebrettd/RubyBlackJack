@@ -3,7 +3,7 @@ class Player
   def initialize(name)
     @name = name
     @bankroll = 1000
-    @hand = nil
+    @hand = []
     @wager = nil
   end
 

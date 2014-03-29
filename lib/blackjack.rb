@@ -1,5 +1,6 @@
 require 'player'
 require 'value'
+require 'deck'
 
 class Blackjack
 
@@ -48,6 +49,8 @@ class Blackjack
 
   def initialize(num_players)
     @player_array = []
+    @deck = Deck.new(6)
+    @dealer = Player.new('Dealer')
     num_players.times do
       initialize_player(@player_array.length)
     end
@@ -94,13 +97,38 @@ class Blackjack
     puts "everyone wins"
   end
 
+  def insurance
+    puts "Insurance (Sucker's bet!)"
+  end
+
   def play_all_hands
+    insurance
     play_all_player_hands
     play_dealer_hand
   end
 
-  def deal_cards
+  def deal_card(player)
+    player.hit(@deck.draw)
+  end
 
+  def deal_card_to_dealer
+    puts "Dealing to #{@dealer.name}"
+    deal_card(@dealer)
+  end
+
+  def deal_card_to_players
+    @current_round_players.length.times do |curr_player_number|
+      curr_player = get_player_by_number(curr_player_number)
+      puts "Dealing to #{curr_player.name}"
+      deal_card(curr_player)
+    end
+  end
+
+  def deal_cards
+    deal_card_to_players
+    deal_card_to_dealer
+    deal_card_to_players
+    deal_card_to_dealer
   end
 
   def get_player_by_number(curr_player_number)
@@ -115,24 +143,13 @@ class Blackjack
   end
 
   def play_dealer_hand
-    # code here
+    puts "Playing hand for #{@dealer.name}"
   end
 
   def get_player_antes
     @player_array.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
-      print "#{curr_player.name} (Bankroll: $#{curr_player.bankroll}) - Enter wager or anything < 1 to abstain: "
-
-      wager_amount, wager_invalid = 0, true
-      while wager_invalid
-        begin
-          wager_amount = Integer(gets.chomp)
-          wager_invalid = invalid_wager?(curr_player, wager_amount)
-        rescue ArgumentError
-          #Catches non-number input and betting more than you have
-          print "Invalid wager, please wager <= $#{curr_player.bankroll}: "
-        end
-      end
+      wager_amount = get_wager_for_player(curr_player)
 
       if wager_amount > 1
         curr_player.place_wager(wager_amount)
@@ -141,6 +158,22 @@ class Blackjack
         puts "#{curr_player.name} abstains"
       end
     end
+  end
+
+  def get_wager_for_player(curr_player)
+    print "#{curr_player.name} (Bankroll: $#{curr_player.bankroll}) - Enter wager or anything < 1 to abstain: "
+
+    wager_amount, wager_invalid = 0, true
+    while wager_invalid
+      begin
+        wager_amount = Integer(gets.chomp)
+        wager_invalid = invalid_wager?(curr_player, wager_amount)
+      rescue ArgumentError
+        #Catches non-number input and betting more than you have
+        print "Invalid wager #{curr_player.name}, please wager <= $#{curr_player.bankroll}: "
+      end
+    end
+    wager_amount
   end
 
   def get_card_value(card)
