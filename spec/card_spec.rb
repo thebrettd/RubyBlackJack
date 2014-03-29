@@ -1,6 +1,6 @@
-require 'card'
-require 'suit'
-require 'value'
+require 'lib/card'
+require 'lib/suit'
+require 'lib/value'
 
 describe Card do
 

@@ -1,5 +1,5 @@
-require 'hand'
-require 'card'
+require 'lib/hand'
+require 'lib/card'
 
 describe Hand do
 
