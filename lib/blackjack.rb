@@ -151,7 +151,7 @@ class Blackjack
       curr_player = get_player_by_number(curr_player_number)
       wager_amount = get_wager_for_player(curr_player)
 
-      if wager_amount > 1
+      if wager_amount >= 1
         curr_player.place_wager(wager_amount)
         @current_round_players.push(curr_player)
       else
