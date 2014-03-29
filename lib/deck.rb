@@ -4,20 +4,29 @@ require 'value'
 
 class Deck
 
+  #http://blog.codinghorror.com/shuffling/
   def shuffle_deck
     puts 'Shuffling deck'
-    [Card.new(Suit::SPADE, Value::ACE)]
+    unshuffled_deck = card_set
+    random = Hash[unshuffled_deck.map { |card| [rand, card] }]
+    shuffled_deck = []
+    random.keys.sort.each { |key| shuffled_deck.push(random[key])}
+    shuffled_deck
   end
 
-  def initialize(shoe_size)
+  def card_set
+    set = []
+    Suit.suit_set.each { |suit| Value.value_set.each { |value| set.push(Card.new(suit, value)) } }
+    set
+  end
+
+  def initialize()
     @deck = shuffle_deck
   end
 
-  def draw
-    if @deck.length == 0
-      puts 'Deck is empty, shuffling'
-      shuffle_deck
-    end
+  def cards
+    @deck
   end
+
 
 end
