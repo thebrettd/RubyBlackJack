@@ -16,4 +16,8 @@ class Hand
     @cards.push(card)
   end
 
+  def only_two_cards?
+    @cards.length == 2
+  end
+
 end

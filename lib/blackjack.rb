@@ -1,6 +1,7 @@
 require 'player'
 require 'value'
-require 'deck'
+require 'shoe'
+require 'move'
 
 class Blackjack
 
@@ -24,7 +25,12 @@ class Blackjack
   def self.start
     puts 'Welcome to blackjack!'
     print 'How many players? '
+    num_players = get_number_of_players
+    game = Blackjack.new(num_players)
+    game.play_game
+  end
 
+  def self.get_number_of_players
     number_invalid = true
     while number_invalid
       begin
@@ -34,10 +40,7 @@ class Blackjack
         print 'Please enter a valid number > 0: '
       end
     end
-
-    game = Blackjack.new(num_players)
-    game.play_game
-
+    num_players
   end
 
   def self.number_valid?(number)
@@ -49,7 +52,7 @@ class Blackjack
 
   def initialize(num_players)
     @player_array = []
-    @deck = Deck.new(6)
+    @shoe = Shoe.new(6)
     @dealer = Player.new('Dealer')
     num_players.times do
       initialize_player(@player_array.length)
@@ -69,8 +72,8 @@ class Blackjack
     hand.cards.each do |card|
       card_points = get_card_value(card)
       if card_points.size == 2
-        one_totals = totals.map { |old_total| old_total + 1 }
-        eleven_totals = totals.map { |old_total| old_total + 11 }
+        one_totals = totals.map { |old_total| old_total + card_points[0] }
+        eleven_totals = totals.map { |old_total| old_total + card_points[1] }
         totals = one_totals + eleven_totals
       else
         totals.map! { |old_total| old_total + card_points[0] }
@@ -108,7 +111,7 @@ class Blackjack
   end
 
   def deal_card(player)
-    player.hit(@deck.draw)
+    player.hit(@shoe.draw)
   end
 
   def deal_card_to_dealer
@@ -138,12 +141,66 @@ class Blackjack
   def play_all_player_hands
     @current_round_players.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
-      puts "Playing hand for #{curr_player.name}"
+      play_player_hands(curr_player)
     end
   end
 
+  def play_player_hands(player)
+    puts "Playing hands for #{player.name}"
+    player.hands.each do |hand|
+      play_player_hand(player, hand)
+    end
+  end
+
+  def play_player_hand(player, hand)
+
+
+  end
+
+  def get_player_move(player, hand)
+    compute_valid_moves(player, hand)
+
+    action_invalid = true
+    while action_invalid
+      begin
+        action = gets.chomp
+        action_invalid = invalid_move?(player, action)
+      rescue ArgumentError
+        #Catches non-number input and betting more than you have
+        print "Invalid action #{player.name}, please select a valid action from the list #{valid_moves}: "
+      end
+    end
+  end
+
+  def compute_valid_moves(player, hand)
+    moves = [Move::STAND]
+
+    totals = get_hand_values(hand)
+    #Don't allow hit if player has 21 (You're welcome)
+    if totals.select{ |total| total == 21}.length >= 1
+      #noop
+    #Player can hit if he has a total < 21
+    elsif totals.select{ |total| total < 21}.length >= 1
+      moves.push(Move::HIT)
+    #Player can split if this hand has exactly 2 two cards and bankroll contains initial wager
+    elsif hand.only_two_cards? && player.bankroll >= player.current_wager
+        moves.push(Move::DOUBLEDOWN)
+    end
+
+    #Player can split if this hand has exactly 2 two cards and are the same
+    if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value
+      moves.push(Move::SPLIT)
+    end
+
+    moves
+  end
+
+  def invalid_move?(curr_player, action)
+    false
+  end
+
   def play_dealer_hand
-    puts "Playing hand for #{@dealer.name}"
+    puts "Playing hand for #{@dealer.name}: #{@dealer.hand}"
   end
 
   def get_player_antes

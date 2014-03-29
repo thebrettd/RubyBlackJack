@@ -62,8 +62,103 @@ describe Blackjack do
     game = Blackjack.new(1)
     player = Player.new('Brett')
 
-    expect {game.validate_wager(player, 1001)}.to raise_error
+    expect {game.invalid_wager?(player, 1001)}.to raise_error
   end
+
+  it 'should allow splitting when both cards are the same' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::ACE))
+    hand.add_card(Card.new(Suit::HEART, Value::ACE))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN, Move::SPLIT])
+  end
+
+  it 'should not allow splitting when both cards are not the same' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::KING))
+    hand.add_card(Card.new(Suit::HEART, Value::QUEEN))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN])
+  end
+
+  it 'Should not allow hit if busted' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::KING))
+    hand.add_card(Card.new(Suit::HEART, Value::QUEEN))
+    hand.add_card(Card.new(Suit::HEART, Value::QUEEN))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+  end
+
+  it 'Should not allow double down if more than 2 cards' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::KING))
+    hand.add_card(Card.new(Suit::HEART, Value::QUEEN))
+    hand.add_card(Card.new(Suit::HEART, Value::QUEEN))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+  end
+
+  it 'Soft 20 allow double down' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::ACE))
+    hand.add_card(Card.new(Suit::HEART, Value::NINE))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN ])
+  end
+
+  it 'Allow hitting if any hand total < 21 (i.e 11 ace busts but 1 ace does not)' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::ACE))
+    hand.add_card(Card.new(Suit::HEART, Value::NINE))
+    hand.add_card(Card.new(Suit::SPADE, Value::TWO))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
+  end
+
+  it 'Doesnt allow hitting if total is 21' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::ACE))
+    hand.add_card(Card.new(Suit::HEART, Value::TEN))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+  end
+
 
 
 
