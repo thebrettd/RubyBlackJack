@@ -101,17 +101,17 @@ class Blackjack
   end
 
   def insurance
-    puts "Insurance (Sucker's bet!)"
+    puts "Insurance? (Sucker's bet!)"
   end
 
   def play_all_hands
     insurance
-    play_all_player_hands
-    play_dealer_hand
+    do_all_players_turns
+    do_dealers_turn
   end
 
   def deal_card(player)
-    player.hit(@shoe.draw)
+    player.hands[0].hit(@shoe.draw)
   end
 
   def deal_card_to_dealer
@@ -138,14 +138,14 @@ class Blackjack
     @player_array[curr_player_number]
   end
 
-  def play_all_player_hands
+  def do_all_players_turns
     @current_round_players.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
-      play_player_hands(curr_player)
+      do_player_turn(curr_player)
     end
   end
 
-  def play_player_hands(player)
+  def do_player_turn(player)
     puts "Playing hands for #{player.name}"
     player.hands.each do |hand|
       play_player_hand(player, hand)
@@ -153,8 +153,8 @@ class Blackjack
   end
 
   def play_player_hand(player, hand)
-
-
+    puts "#{player.name}: #{hand} dealer has: #{@dealer.hands[0]}"
+    get_player_move(player,hand)
   end
 
   def get_player_move(player, hand)
@@ -163,6 +163,7 @@ class Blackjack
     action_invalid = true
     while action_invalid
       begin
+
         action = gets.chomp
         action_invalid = invalid_move?(player, action)
       rescue ArgumentError
@@ -199,8 +200,8 @@ class Blackjack
     false
   end
 
-  def play_dealer_hand
-    puts "Playing hand for #{@dealer.name}: #{@dealer.hand}"
+  def do_dealers_turn
+    puts "Playing hand for #{@dealer.name}: #{@dealer.hands[0]}"
   end
 
   def get_player_antes

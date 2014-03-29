@@ -20,4 +20,16 @@ class Hand
     @cards.length == 2
   end
 
+  def hit(card)
+    @cards.push(card)
+  end
+
+  def to_s
+    string = ''
+    @cards.each do |card|
+      string += "#{card}" + ','
+    end
+    string
+  end
+
 end

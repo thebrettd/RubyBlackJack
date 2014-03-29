@@ -1,9 +1,11 @@
+require 'hand'
+
 class Player
 
   def initialize(name)
     @name = name
     @bankroll = 1000
-    @hands = []
+    @hands = [Hand.new]
     @wager = nil
   end
 
@@ -30,10 +32,6 @@ class Player
   def place_wager(amount)
     @wager = amount
     @bankroll -= amount
-  end
-
-  def hit(card)
-    @hands.push(card)
   end
 
 end
