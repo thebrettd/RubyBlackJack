@@ -74,9 +74,13 @@ class Blackjack
       gets
     end
 
+    game_over
+
+  end
+
+  def game_over
     puts 'All players our of money!'
     puts 'Game Over!'
-
   end
 
   #Return array of all distinct hand values. Ace counts as 1 or 11
@@ -173,16 +177,16 @@ class Blackjack
   end
 
   def self.seventeen_or_above(totals)
-    totals.select { |total| total >= 17 }.length > 0
+    totals.select { |total| total >= 17 && total <= 21 }.length > 0
   end
 
   def evaluate_dealer_hand
     heading('Playing dealer hand!')
     totals = Blackjack.get_hand_values(@dealer.hands[0])
     dealer_score(totals)
-    while Blackjack.seventeen_or_above(totals) == false || Blackjack.contains_soft_seventeen(@dealer.hands[0])
+    while !dealer_busted && (Blackjack.seventeen_or_above(totals) == false || Blackjack.contains_soft_seventeen(@dealer.hands[0]))
       card = @shoe.draw
-      @dealer.hands[0].hit(card)
+      @dealer.hands[0].add_card(card, true)
       puts "Dealer draws a #{card}"
       totals = Blackjack.get_hand_values(@dealer.hands[0])
       dealer_score(totals)
@@ -251,9 +255,9 @@ class Blackjack
     if show
       puts "Dealing to #{player.name}: #{card}"
     elsif
-      puts 'Dealing hidden card'
+      puts "Dealing hidden card to #{player.name}"
     end
-    player.hands[0].hit(card)
+    player.hands[0].add_card(card, false)
   end
 
 
@@ -285,7 +289,7 @@ class Blackjack
   def play_player_hand(player, hand)
     while true
       puts "#{player.name} has: #{hand} \nTotals: #{Blackjack.get_hand_values(hand).join(',')}"
-      puts "Dealer shows: #{@dealer.hands[0].cards[0]}"
+      puts "Dealer shows: #{@dealer.hands[0].cards[1]}"
       move = get_player_move(player,hand)
 
       handle_move(player, hand, move)
@@ -355,28 +359,36 @@ class Blackjack
   def handle_move(player, hand, move)
     case move
       when Move::STAND
-        puts "#{player.name} stands! Totals: #{Blackjack.get_hand_values(hand).join(",")}"
+        stand(hand, player)
       when Move::HIT
-        puts "#{player.name} hits!"
-        card = @shoe.draw
-        hand.hit(card)
-        puts "#{player.name} drew a #{card}, totals: #{Blackjack.get_hand_values(hand).join(",")}"
+        hit(hand, player)
       when Move::DOUBLEDOWN
-        player.double_down
-        puts "#{player.name} Double's Down! Good Luck!"
-        card = @shoe.draw
-        hand.hit(card)
-        puts "#{player.name} drew a #{card}, totals: #{Blackjack.get_hand_values(hand).join(",")}"
+        double_down(hand, player)
       when Move::SPLIT
-        puts "#{player.name} splits! Good Luck!"
-        split_hand = Hand.new
-        split_hand.add_card(hand.cards[2])
-        hand.cards[2] = nil
-        player.hands.concat(split_hand)
+        split_hand(hand, player)
 
       else
         raise ArgumentError
     end
+  end
+
+  def stand(hand, player)
+    puts "#{player.name} stands! Totals: #{Blackjack.get_hand_values(hand).join(",")}"
+  end
+
+  def hit(hand, player)
+    puts "#{player.name} hits!"
+    player.hit(hand,@shoe)
+  end
+
+  def double_down(hand, player)
+    puts "#{player.name} Double's Down! Good Luck!"
+    player.double_down(hand, @shoe)
+  end
+
+  def split_hand(hand, player)
+    puts "#{player.name} splits! Good Luck!"
+    player.split(hand)
   end
 
   def compute_valid_moves(player, hand)

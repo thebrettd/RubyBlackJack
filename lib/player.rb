@@ -25,11 +25,32 @@ class Player
     @hands
   end
 
+  def hit(hand, shoe)
+    card = shoe.draw
+    hand.add_card(card, true)
+  end
+
+  def add_hand(hand)
+    @hands.push(hand)
+  end
+
   def new_hands
     @hands = [Hand.new]
   end
 
-  def double_down
+  def double_down(hand, shoe)
+    card = shoe.draw
+    hand.add_card(card, true)
+
+    @bankroll -= @wager
+    @wager += @wager
+  end
+
+  def split(hand)
+    split_hand = Hand.new
+    split_hand.add_card(hand.cards[1], false)
+    hand.cards[1] = nil
+    add_hand(split_hand)
     @bankroll -= @wager
     @wager += @wager
   end
