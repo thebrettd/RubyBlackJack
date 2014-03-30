@@ -159,7 +159,83 @@ describe Blackjack do
     game.compute_valid_moves(player, hand).should eq([Move::STAND])
   end
 
+  it 'Same cards should push' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
 
+    player.place_wager(5)
 
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    hand.add_card(ten_spades)
+    ten_hearts = Card.new(Suit::HEART, Value::TEN)
+    hand.add_card(ten_hearts)
+
+    game.dealer.hands[0].hit(ten_spades)
+    game.dealer.hands[0].hit(ten_hearts)
+
+    game.evaluate_hand(hand).should eq(Result::PUSH)
+  end
+
+  it 'Players 20 versus 18 should win' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    ten_hearts = Card.new(Suit::HEART, Value::TEN)
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    hand.add_card(ten_spades)
+    hand.add_card(ten_hearts)
+
+    nine_spades = Card.new(Suit::SPADE, Value::NINE)
+    nine_hearts = Card.new(Suit::HEART, Value::NINE)
+    game.dealer.hands[0].hit(nine_spades)
+    game.dealer.hands[0].hit(nine_hearts)
+
+    game.evaluate_hand(hand).should eq(Result::WIN)
+  end
+
+  it 'Player 18 dealer 20 loses' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    nine_spades = Card.new(Suit::SPADE, Value::NINE)
+    nine_hearts = Card.new(Suit::HEART, Value::NINE)
+    hand.add_card(nine_spades)
+    hand.add_card(nine_hearts)
+
+    ten_hearts = Card.new(Suit::HEART, Value::TEN)
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    game.dealer.hands[0].hit(ten_hearts)
+    game.dealer.hands[0].hit(ten_spades)
+
+    game.evaluate_hand(hand).should eq(Result::LOSE)
+  end
+
+  it 'dealer bust player anything should win' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
+    hand.add_card(ten_spades)
+    hand.add_card(seven_hearts)
+
+    ten_hearts = Card.new(Suit::HEART, Value::TEN)
+    six_spade = Card.new(Suit::SPADE, Value::SIX)
+    game.dealer.hands[0].hit(ten_hearts)
+    game.dealer.hands[0].hit(six_spade)
+    game.dealer.hands[0].hit(six_spade)
+
+    game.evaluate_hand(hand).should eq(Result::WIN)
+  end
 
 end

@@ -2,6 +2,7 @@ require 'player'
 require 'value'
 require 'shoe'
 require 'move'
+require 'result'
 
 class Blackjack
 
@@ -21,6 +22,10 @@ class Blackjack
   Value::KING => [10],
   Value::ACE => [1,11]
   }
+
+  def dealer
+    @dealer
+  end
 
   def self.start
     puts 'Welcome to blackjack!'
@@ -97,7 +102,50 @@ class Blackjack
   end
 
   def resolve_hands
-    puts "everyone wins"
+
+    @current_round_players.each do |player|
+      evalute_hands(player)
+    end
+
+    @dealer.new_hands
+  end
+
+  def evalute_hands(player)
+
+    player.hands.each do |hand|
+      puts "Dealer has #{@dealer.hands[0]}"
+      result = evaluate_hand(hand)
+      if result == Result::Push
+        puts "#{player.name} pushes with #{hand}!"
+        player.credit(player.current_wager)
+      elsif result == Result::WIN
+        winnings = player.current_wager * 2
+        puts "#{player.name} wins with #{hand}! Winnings: $#{winnings}"
+        player.credit(winnings)
+      else
+        puts "#{player.name} loses! :("
+      end
+    end
+  end
+
+  def evaluate_hand(hand)
+    dealers_totals = get_hand_values(@dealer.hands[0]).select { |total| total <= 21 }
+    players_best = get_hand_values(hand).select { |total| total <= 21}.max
+    dealers_best = dealers_totals.max
+    dealer_bust = dealers_totals.size == 0
+    player_bust = players_best.size == 0
+
+    if player_bust
+      return Result::LOSE
+    elsif dealer_bust
+      return Result::WIN
+    elsif dealers_best > players_best
+      return Result::LOSE
+    elsif players_best > dealers_best
+      return Result::WIN
+    elsif players_best == dealers_best
+      return Result::PUSH
+    end
   end
 
   def insurance
@@ -180,19 +228,20 @@ class Blackjack
     #Don't allow hit if player has 21 (You're welcome)
     if totals.select{ |total| total == 21}.length >= 1
       #noop
-    #Player can hit if he has a total < 21
-    elsif totals.select{ |total| total < 21}.length >= 1
-      moves.push(Move::HIT)
-    #Player can split if this hand has exactly 2 two cards and bankroll contains initial wager
-    elsif hand.only_two_cards? && player.bankroll >= player.current_wager
+    else
+      if totals.select{ |total| total < 21}.length >= 1
+        moves.push(Move::HIT)
+      end
+      #Player can double down if he only has 2 cards and enough money
+      if hand.only_two_cards? && player.bankroll >= player.current_wager
         moves.push(Move::DOUBLEDOWN)
+        #Player can hit if he has a total < 21
+      end
+      #Player can split if this hand has exactly 2 two cards and are the same
+      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value
+        moves.push(Move::SPLIT)
+      end
     end
-
-    #Player can split if this hand has exactly 2 two cards and are the same
-    if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value
-      moves.push(Move::SPLIT)
-    end
-
     moves
   end
 

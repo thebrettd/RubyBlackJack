@@ -17,12 +17,20 @@ class Player
     @bankroll
   end
 
+  def credit(amount)
+    @bankroll += amount
+  end
+
   def hands
     @hands
   end
 
   def new_hands
-    @hands = []
+    @hands = [[]]
+  end
+
+  def double_down
+    @wager *= 2
   end
 
   def current_wager
