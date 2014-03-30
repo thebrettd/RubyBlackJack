@@ -70,7 +70,7 @@ class Blackjack
   def play_game
     while @player_array.select{ |player| player.bankroll > 0 }.length > 0
       play_round
-      puts 'Round over, press any key to continue to next round'
+      puts "\nRound over, press any key to continue to next round"
       gets
     end
 
@@ -164,6 +164,8 @@ class Blackjack
   def evalute_all_players_hands
     heading('Results')
 
+    dealer_score(Blackjack.get_hand_values(@dealer.hands[0]))
+
     @current_round_players.each do |player|
       detemine_results(player)
       player.new_hands
@@ -187,7 +189,7 @@ class Blackjack
     while !dealer_busted && (Blackjack.seventeen_or_above(totals) == false || Blackjack.contains_soft_seventeen(@dealer.hands[0]))
       card = @shoe.draw
       @dealer.hands[0].add_card(card, true)
-      puts "Dealer draws a #{card}"
+      #puts "Dealer draws a #{card}"
       totals = Blackjack.get_hand_values(@dealer.hands[0])
       dealer_score(totals)
 
@@ -214,17 +216,16 @@ class Blackjack
   def detemine_results(player)
 
     player.hands.each do |hand|
-      puts "Dealer has #{@dealer.hands[0]}, \nTotals: #{Blackjack.get_hand_values(@dealer.hands[0])}"
       result = evaluate_hand(hand)
       if result == Result::PUSH
-        puts "#{player.name} pushes with #{hand}!"
+        puts "\n#{player.name} pushes with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')}!"
         player.credit(player.current_wager)
       elsif result == Result::WIN
         winnings = player.current_wager * 2
-        puts "#{player.name} wins with #{hand}! \nWinnings: $#{winnings}"
+        puts "\n#{player.name} wins with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')}\nWinnings: $#{winnings}"
         player.credit(winnings)
       else
-        puts "#{player.name} loses! :("
+        puts "\n #{player.name} loses with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')} "
       end
     end
   end
