@@ -298,6 +298,11 @@ class Blackjack
         hand.hit(card)
       when Move::SPLIT
         puts "#{player.name} splits! Good Luck!"
+        split_hand = Hand.new
+        split_hand.add_card(hand.cards[2])
+        hand.cards[2] = nil
+        player.hands.concat(split_hand)
+
       else
         raise ArgumentError
     end
