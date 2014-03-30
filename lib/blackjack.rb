@@ -23,6 +23,15 @@ class Blackjack
   Value::ACE => [1,11]
   }
 
+  def initialize(num_players)
+    @player_array = []
+    @shoe = Shoe.new(6)
+    @dealer = Player.new('Dealer')
+    num_players.times do
+      initialize_player(@player_array.length)
+    end
+  end
+
   def dealer
     @dealer
   end
@@ -53,15 +62,6 @@ class Blackjack
       raise ArgumentError
     end
     false
-  end
-
-  def initialize(num_players)
-    @player_array = []
-    @shoe = Shoe.new(6)
-    @dealer = Player.new('Dealer')
-    num_players.times do
-      initialize_player(@player_array.length)
-    end
   end
 
   def play_game
@@ -101,13 +101,43 @@ class Blackjack
     resolve_hands
   end
 
+  def deal_cards
+    deal_card_to_players
+    deal_card_to_dealer
+    deal_card_to_players
+    deal_card_to_dealer
+  end
+
   def resolve_hands
+
+    evaluate_dealer_hand
 
     @current_round_players.each do |player|
       evalute_hands(player)
+      player.new_hands
     end
 
     @dealer.new_hands
+  end
+
+  def evaluate_dealer_hand
+    dealer_hand = @dealer.hands[0]
+    totals = get_hand_values(dealer_hand)
+    while totals.max < 17
+      card = @shoe.draw
+      dealer_hand.hit(card)
+      puts "Dealer draws a #{card}"
+      totals = get_hand_values(dealer_hand)
+    end
+
+    if dealer_busted
+      puts "Dealer busts with #{dealer_hand} values: #{get_hand_values(dealer_hand).join(',')}"
+    end
+
+  end
+
+  def dealer_busted
+    get_hand_values(@dealer.hands[0]).select { |total| total <= 21 }.size == 0
   end
 
   def evalute_hands(player)
@@ -115,7 +145,7 @@ class Blackjack
     player.hands.each do |hand|
       puts "Dealer has #{@dealer.hands[0]}"
       result = evaluate_hand(hand)
-      if result == Result::Push
+      if result == Result::PUSH
         puts "#{player.name} pushes with #{hand}!"
         player.credit(player.current_wager)
       elsif result == Result::WIN
@@ -132,14 +162,14 @@ class Blackjack
     dealers_totals = get_hand_values(@dealer.hands[0]).select { |total| total <= 21 }
     players_best = get_hand_values(hand).select { |total| total <= 21}.max
     dealers_best = dealers_totals.max
-    dealer_bust = dealers_totals.size == 0
-    player_bust = players_best.size == 0
+    dealer_bust = dealers_totals.nil? ? true : false
+    player_bust = players_best.nil? ? true : false
 
     if player_bust
       return Result::LOSE
     elsif dealer_bust
       return Result::WIN
-    elsif dealers_best > players_best
+    elsif player_bust || dealers_best > players_best
       return Result::LOSE
     elsif players_best > dealers_best
       return Result::WIN
@@ -148,12 +178,7 @@ class Blackjack
     end
   end
 
-  def insurance
-    puts "Insurance? (Sucker's bet!)"
-  end
-
   def play_all_hands
-    insurance
     do_all_players_turns
     do_dealers_turn
   end
@@ -175,13 +200,6 @@ class Blackjack
     end
   end
 
-  def deal_cards
-    deal_card_to_players
-    deal_card_to_dealer
-    deal_card_to_players
-    deal_card_to_dealer
-  end
-
   def get_player_by_number(curr_player_number)
     @player_array[curr_player_number]
   end
@@ -201,23 +219,88 @@ class Blackjack
   end
 
   def play_player_hand(player, hand)
-    puts "#{player.name}: #{hand} dealer has: #{@dealer.hands[0]}"
-    get_player_move(player,hand)
+    move = nil
+    while move != Move::STAND || move != Move::DOUBLEDOWN
+      puts "#{player.name}: #{hand} totals: #{get_hand_values(hand).join(',')}"
+      puts "Dealer has: #{@dealer.hands[0]} totals: #{get_hand_values(@dealer.hands[0]).join(',')}"
+      move = get_player_move(player,hand)
+
+      handle_move(player, hand, move)
+      if is_busted?(hand)
+        puts "#{player.name}: Busted! :("
+        break
+      end
+    end
+  end
+
+  def is_busted?(hand)
+    get_hand_values(hand).select { |total| total <= 21}.length == 0
   end
 
   def get_player_move(player, hand)
-    compute_valid_moves(player, hand)
+    valid_moves = compute_valid_moves(player, hand)
 
-    action_invalid = true
-    while action_invalid
+    move_invalid = true
+    while move_invalid
       begin
-
-        action = gets.chomp
-        action_invalid = invalid_move?(player, action)
+        puts "Enter the first letter of a move from the list: #{valid_moves}"
+        input_move = gets.chomp
+        move_invalid = invalid_move?(input_move)
       rescue ArgumentError
         #Catches non-number input and betting more than you have
-        print "Invalid action #{player.name}, please select a valid action from the list #{valid_moves}: "
+        print "Invalid move #{player.name}, please select a valid move from the list #{valid_moves}: "
       end
+    end
+
+    case input_move.upcase
+      when 'S'
+        return Move::STAND
+      when 'H'
+        return Move::HIT
+      when 'D'
+        return Move::DOUBLEDOWN
+      when 'P'
+        return Move::SPLIT
+      else
+        raise ArgumentError
+    end
+
+  end
+
+  def invalid_move?(move)
+    case move.upcase
+      when 'S'
+        return false
+      when 'H'
+        return false
+      when 'D'
+        return false
+      when 'P'
+        return false
+      else
+        return true
+    end
+  end
+
+  def handle_move(player, hand, move)
+    case move
+      when Move::STAND
+        puts "#{player.name} stands!"
+      when Move::HIT
+        puts "#{player.name} hits!"
+        card = @shoe.draw
+        puts "#{player.name} drew a #{card}"
+        hand.hit(card)
+      when Move::DOUBLEDOWN
+        player.double_down
+        puts "#{player.name} Double's Down! Good Luck!"
+        card = @shoe.draw
+        puts "#{player.name} drew a #{card}"
+        hand.hit(card)
+      when Move::SPLIT
+        puts "#{player.name} splits! Good Luck!"
+      else
+        raise ArgumentError
     end
   end
 
@@ -243,10 +326,6 @@ class Blackjack
       end
     end
     moves
-  end
-
-  def invalid_move?(curr_player, action)
-    false
   end
 
   def do_dealers_turn

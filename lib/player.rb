@@ -26,11 +26,12 @@ class Player
   end
 
   def new_hands
-    @hands = [[]]
+    @hands = [Hand.new]
   end
 
   def double_down
-    @wager *= 2
+    @bankroll -= @wager
+    @wager += @wager
   end
 
   def current_wager

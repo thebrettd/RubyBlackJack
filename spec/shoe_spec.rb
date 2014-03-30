@@ -18,4 +18,13 @@ describe Shoe do
     shoe.cards.should eq(51)
   end
 
+  it 'Shoe refreshes when <= 20 cards in shoe' do
+    shoe = Shoe.new(1)
+    32.times do
+      shoe.draw
+    end
+    shoe.draw
+    shoe.cards.should eq(51)
+  end
+
 end

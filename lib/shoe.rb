@@ -5,6 +5,10 @@ class Shoe
   def initialize(shoe_size)
     @shoe_size = shoe_size
     @shoe = []
+    create_new_shoe(shoe_size)
+  end
+
+  def create_new_shoe(shoe_size)
     puts "Creating #{shoe_size}-deck shoe"
     deck_count = 0
     shoe_size.times do
@@ -16,7 +20,14 @@ class Shoe
   end
 
   def draw
-    @shoe.pop
+    if @shoe.size <= 20
+      puts 'Shoe size <= 20, generating new shoe'
+      @shoe = []
+      create_new_shoe(@shoe_size)
+      @shoe.pop
+    else
+      @shoe.pop
+    end
   end
 
   def shoe_size
