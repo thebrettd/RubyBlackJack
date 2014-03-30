@@ -25,11 +25,7 @@ class Hand
   end
 
   def to_s
-    string = ''
-    @cards.each do |card|
-      string += "#{card}" + ','
-    end
-    string
+    @cards.join(',')
   end
 
 end

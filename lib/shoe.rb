@@ -9,11 +9,10 @@ class Shoe
   end
 
   def create_new_shoe(shoe_size)
-    puts "Creating #{shoe_size}-deck shoe"
+    puts "\nCreating #{shoe_size}-deck shoe"
     deck_count = 0
     shoe_size.times do
       deck = Deck.new.cards
-      puts "Adding deck #{deck_count} to shoe"
       @shoe.concat(deck)
       deck_count += 1
     end
