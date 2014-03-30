@@ -65,11 +65,15 @@ class Blackjack
   end
 
   def play_game
-    while true
+    while @player_array.select{ |player| player.bankroll > 0 }.length > 0
       play_round
       puts 'Round over, press any key to continue to next round'
       gets
     end
+
+    puts 'All players our of money!'
+    puts 'Game Over!'
+
   end
 
   def get_hand_values(hand)
