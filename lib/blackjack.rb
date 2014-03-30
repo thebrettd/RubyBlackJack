@@ -141,6 +141,7 @@ class Blackjack
 
   def play_round
     @current_round_players = []
+    @dealer.new_hands
     get_player_antes
     deal_cards
     do_all_players_turns
@@ -158,7 +159,6 @@ class Blackjack
   def resolve_hands
     evaluate_dealer_hand
     evalute_all_players_hands
-    @dealer.new_hands
   end
 
   def evalute_all_players_hands
@@ -168,7 +168,6 @@ class Blackjack
 
     @current_round_players.each do |player|
       detemine_results(player)
-      player.new_hands
     end
   end
 
@@ -213,19 +212,35 @@ class Blackjack
     Blackjack.get_hand_values(@dealer.hands[0]).select { |total| total <= 21 }.size == 0
   end
 
+  def max_under_twenty_two(hand)
+    Blackjack.get_hand_values(hand).select{|total| total <= 21 }.max
+  end
+
+  def minimum_score(hand)
+    Blackjack.get_hand_values(hand).min
+  end
+
+  def losing_score(hand)
+    if is_busted?(hand)
+      minimum_score(hand)
+    else
+      max_under_twenty_two(hand)
+    end
+  end
+
   def detemine_results(player)
 
     player.hands.each do |hand|
       result = evaluate_hand(hand)
       if result == Result::PUSH
-        puts "\n#{player.name} pushes with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')}!"
+        puts "\n#{player.name} pushes with #{hand}! Final Score: #{max_under_twenty_two(hand)}"
         player.credit(player.current_wager)
       elsif result == Result::WIN
         winnings = player.current_wager * 2
-        puts "\n#{player.name} wins with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')}\nWinnings: $#{winnings}"
+        puts "\n#{player.name} wins with #{hand}! Final Score: #{max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
         player.credit(winnings)
       else
-        puts "\n #{player.name} loses with #{hand}! Totals: #{Blackjack.get_hand_values(hand).join(',')} "
+        puts "\n #{player.name} loses with #{hand}! Final Score: #{losing_score(hand)}"
       end
     end
   end
@@ -389,7 +404,7 @@ class Blackjack
 
   def split_hand(hand, player)
     puts "#{player.name} splits! Good Luck!"
-    player.split(hand)
+    player.split_hand(hand, @shoe)
   end
 
   def compute_valid_moves(player, hand)
@@ -424,6 +439,7 @@ class Blackjack
 
       if wager_amount >= 1
         curr_player.place_wager(wager_amount)
+        curr_player.new_hands
         @current_round_players.push(curr_player)
       else
         puts "#{curr_player.name} abstains"

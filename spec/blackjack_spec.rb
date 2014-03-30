@@ -107,12 +107,15 @@ describe Blackjack do
   it 'splitting should increase the number of players hands by one' do
     game = Blackjack.new(1)
     player = Player.new('Brett')
-    hand = Hand.new
+    player.hands.size.should be == 0
 
     player.place_wager(5)
 
-    hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
+    hand = Hand.new
+    player.add_hand(hand)
+    hand.add_card(Card.new(Suit::SPADE, Value::QUEEN), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
+    player.hands.size.should be == 1
 
     game.split_hand(hand,player)
     player.hands.size.should be == 2
@@ -215,6 +218,7 @@ describe Blackjack do
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     hand.add_card(ten_hearts, false)
 
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ten_spades, false)
     game.dealer.hands[0].add_card(ten_hearts, false)
 
@@ -235,6 +239,7 @@ describe Blackjack do
 
     nine_spades = Card.new(Suit::SPADE, Value::NINE)
     nine_hearts = Card.new(Suit::HEART, Value::NINE)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(nine_spades, false)
     game.dealer.hands[0].add_card(nine_hearts, false)
 
@@ -255,6 +260,7 @@ describe Blackjack do
 
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ten_hearts, false)
     game.dealer.hands[0].add_card(ten_spades, false)
 
@@ -275,6 +281,7 @@ describe Blackjack do
 
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     six_spade = Card.new(Suit::SPADE, Value::SIX)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ten_hearts, false)
     game.dealer.hands[0].add_card(six_spade, false)
     game.dealer.hands[0].add_card(six_spade, false)
@@ -287,6 +294,7 @@ describe Blackjack do
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ten_spades, false)
     game.dealer.hands[0].add_card(seven_hearts, false)
 
@@ -300,6 +308,7 @@ describe Blackjack do
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(six_hearts, false)
     game.dealer.hands[0].add_card(ten_spades, false)
 
@@ -314,6 +323,7 @@ describe Blackjack do
     #Simple soft 17
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ace_spades, false)
     game.dealer.hands[0].add_card(six_hearts, false)
     Blackjack.contains_soft_seventeen(game.dealer.hands[0]).should eq(true)
@@ -355,6 +365,7 @@ describe Blackjack do
     #Dealer hits after simple soft 17
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.new_hands
     game.dealer.hands[0].add_card(ace_spades, false)
     game.dealer.hands[0].add_card(six_hearts, false)
     game.evaluate_dealer_hand

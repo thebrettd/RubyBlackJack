@@ -5,7 +5,7 @@ class Player
   def initialize(name)
     @name = name
     @bankroll = 1000
-    @hands = [Hand.new]
+    @hands = []
     @wager = nil
   end
 
@@ -46,13 +46,18 @@ class Player
     @wager += @wager
   end
 
-  def split(hand)
-    split_hand = Hand.new
-    split_hand.add_card(hand.cards[1], false)
-    hand.cards[1] = nil
-    add_hand(split_hand)
+  def split_hand(hand_to_split, shoe)
     @bankroll -= @wager
     @wager += @wager
+
+    new_hand = Hand.new
+    new_hand.add_card(hand_to_split.cards[1], false)
+    add_hand(new_hand)
+
+    hand_to_split.cards.delete_at(1)
+    hand_to_split.add_card(shoe.draw, true)
+
+    new_hand.add_card(shoe.draw, true)
   end
 
   def current_wager
