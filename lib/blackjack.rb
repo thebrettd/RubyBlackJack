@@ -396,7 +396,7 @@ class Blackjack
         #Player can hit if he has a total < 21
       end
       #Player can split if this hand has exactly 2 two cards and are the same
-      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value
+      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value && player.bankroll >= player.current_wager
         moves.push(Move::SPLIT)
       end
     end

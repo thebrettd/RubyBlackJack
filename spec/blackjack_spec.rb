@@ -78,6 +78,19 @@ describe Blackjack do
     game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN, Move::SPLIT])
   end
 
+  it 'should not allow splitting when the player lacks funds' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett')
+    hand = Hand.new
+
+    player.place_wager(1000)
+
+    hand.add_card(Card.new(Suit::SPADE, Value::ACE))
+    hand.add_card(Card.new(Suit::HEART, Value::ACE))
+
+    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
+  end
+
   it 'should not allow splitting when both cards are not the same' do
     game = Blackjack.new(1)
     player = Player.new('Brett')
