@@ -238,4 +238,93 @@ describe Blackjack do
     game.evaluate_hand(hand).should eq(Result::WIN)
   end
 
+  it 'dealer should stand on hard 17' do
+    game = Blackjack.new(1)
+
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
+    game.dealer.hands[0].add_card(ten_spades)
+    game.dealer.hands[0].add_card(seven_hearts)
+
+    game.evaluate_dealer_hand
+
+    game.dealer.hands[0].size.should be == 2
+  end
+
+  it 'dealer should hit on 16' do
+    game = Blackjack.new(1)
+
+    ten_spades = Card.new(Suit::SPADE, Value::TEN)
+    six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.hands[0].add_card(six_hearts)
+    game.dealer.hands[0].add_card(ten_spades)
+
+    game.evaluate_dealer_hand
+
+    game.dealer.hands[0].size.should be >= 3
+  end
+
+  it 'can detect soft 17' do
+    game = Blackjack.new(1)
+
+    #Simple soft 17
+    ace_spades = Card.new(Suit::SPADE, Value::ACE)
+    six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.hands[0].add_card(ace_spades)
+    game.dealer.hands[0].add_card(six_hearts)
+    Blackjack.contains_soft_seventeen(game.dealer.hands[0]).should eq(true)
+
+    #Complex soft 17
+    game.dealer.new_hands
+    three_spades = Card.new(Suit::HEART, Value::THREE)
+    game.dealer.hands[0].add_card(ace_spades)
+    game.dealer.hands[0].add_card(three_spades)
+    game.dealer.hands[0].add_card(three_spades)
+    Blackjack.contains_soft_seventeen(game.dealer.hands[0]).should eq(true)
+
+    #hard 17 that contains 1-valued aces
+    game.dealer.new_hands
+    five_hearts = Card.new(Suit::HEART, Value::FIVE)
+    game.dealer.hands[0].add_card(six_hearts)
+    game.dealer.hands[0].add_card(five_hearts)
+    game.dealer.hands[0].add_card(five_hearts)
+    game.dealer.hands[0].add_card(ace_spades)
+    Blackjack.contains_soft_seventeen(game.dealer.hands[0]).should eq(false)
+
+  end
+
+
+  it 'dealer should hit on soft 17' do
+    game = Blackjack.new(1)
+
+    #Dealer hits after simple soft 17
+    ace_spades = Card.new(Suit::SPADE, Value::ACE)
+    six_hearts = Card.new(Suit::HEART, Value::SIX)
+    game.dealer.hands[0].add_card(ace_spades)
+    game.dealer.hands[0].add_card(six_hearts)
+    game.evaluate_dealer_hand
+    game.dealer.hands[0].size.should be >= 3
+
+    #Dealer hits after complex soft 17
+    game.dealer.new_hands
+    three_spades = Card.new(Suit::HEART, Value::THREE)
+    game.dealer.hands[0].add_card(ace_spades)
+    game.dealer.hands[0].add_card(three_spades)
+    game.dealer.hands[0].add_card(three_spades)
+    game.evaluate_dealer_hand
+    game.dealer.hands[0].size.should be >= 4
+
+    #Dealer doesnt after hard 17 that contains 1-valued aces
+    game.dealer.new_hands
+    five_hearts = Card.new(Suit::HEART, Value::FIVE)
+    game.dealer.hands[0].add_card(six_hearts)
+    game.dealer.hands[0].add_card(five_hearts)
+    game.dealer.hands[0].add_card(five_hearts)
+    game.dealer.hands[0].add_card(ace_spades)
+    game.evaluate_dealer_hand
+    game.dealer.hands[0].size.should be == 4
+
+  end
+
+
 end

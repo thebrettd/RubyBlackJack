@@ -17,14 +17,14 @@ describe Player do
 
   it 'should have an empty hand to start' do
     player = Player.new('Test Player')
-    player.hands.empty?.should eq(true)
+    player.hands[0].cards.length.should eq(0)
   end
 
   it 'should be able to start a new empty hand' do
     player = Player.new('Test Player')
     player.new_hands
     player.hands.nil?.should eq(false)
-    player.hands.size.should eq(0)
+    player.hands[0].cards.size.should eq(0)
   end
 
   it 'should have a nil wager' do
@@ -46,10 +46,10 @@ describe Player do
 
   it 'hand size should increase after hitting' do
     player = Player.new('Test Player')
-    player.new_hand
+    player.new_hands
 
-    player.hit(Card.new(Suit::SPADE, Value::TEN))
-    player.hand.size.should eq(1)
+    player.hands[0].hit(Card.new(Suit::SPADE, Value::TEN))
+    player.hands[0].cards.size.should eq(1)
   end
 
 end

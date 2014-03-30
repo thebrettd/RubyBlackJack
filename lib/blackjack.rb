@@ -79,19 +79,54 @@ class Blackjack
 
   end
 
+  #Return array of all distinct hand values. Ace counts as 1 or 11
   def self.get_hand_values(hand)
     totals = [0]
     hand.cards.each do |card|
       card_points = self.get_card_value(card)
       if card_points.size == 2
+        #Add a value of 1 to all known sums
         one_totals = totals.map { |old_total| old_total + card_points[0] }
+        #Add a value of 11 to all known sums
         eleven_totals = totals.map { |old_total| old_total + card_points[1] }
+        #Combine 11-ace and 1-ace totals
         totals = one_totals + eleven_totals
       else
+        #Non-ace, just add the value to all known sums
         totals.map! { |old_total| old_total + card_points[0] }
       end
     end
     totals.uniq
+  end
+
+  #Same logic as above, but return true if any 11-valued ace results in a sum of 17.
+  def self.contains_soft_seventeen(hand)
+
+    if hand.cards.select { |card| card.value == Value::ACE }.length == 0
+      return false
+    end
+
+    totals = [0]
+    soft_totals = []
+    hand.cards.each do |card|
+      card_points = self.get_card_value(card)
+      if card_points.size == 2
+        #Add a value of 1 to all known sums
+        one_totals = totals.map { |old_total| old_total + card_points[0] }
+        #Add a value of 11 to all known sums
+        eleven_totals = totals.map { |old_total| old_total + card_points[1] }
+        soft_totals = soft_totals + eleven_totals
+        #Combine 11-ace and 1-ace totals
+        totals = one_totals + eleven_totals
+      else
+        #Non-ace, just add the value to all known sums
+        totals.map! { |old_total| old_total + card_points[0] }
+        soft_totals.map! { |old_total| old_total + card_points[0] }
+      end
+    end
+
+    return soft_totals.select {|value| value == 17}.length > 0
+
   end
 
   def initialize_player(player_num)
@@ -137,11 +172,15 @@ class Blackjack
     line
   end
 
+  def self.seventeen_or_above(totals)
+    totals.select { |total| total >= 17 }.length > 0
+  end
+
   def evaluate_dealer_hand
     heading('Playing dealer hand!')
     totals = Blackjack.get_hand_values(@dealer.hands[0])
     dealer_score(totals)
-    while totals.min < 17
+    while Blackjack.seventeen_or_above(totals) == false || Blackjack.contains_soft_seventeen(@dealer.hands[0])
       card = @shoe.draw
       @dealer.hands[0].hit(card)
       puts "Dealer draws a #{card}"
@@ -157,7 +196,7 @@ class Blackjack
   end
 
   def dealer_score(totals)
-    puts "Dealer has #{@dealer.hands[0]}\nTotals: #{totals}"
+    puts "Dealer has #{@dealer.hands[0]}\nTotals: #{totals.join(',')}"
   end
 
   def line
