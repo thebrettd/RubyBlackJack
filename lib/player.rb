@@ -115,14 +115,13 @@ class Player
   def get_player_move(hand)
     valid_moves = Logic.compute_valid_moves(self, hand)
 
-    move_invalid = true
-    while move_invalid
+    move_valid = false
+    while !move_valid
       begin
-        puts "\nEnter the first letter of a move from the list: #{valid_moves.join(' ')}"
+        puts "\nEnter the first letter of a move from the list (Or P to split): #{valid_moves.join(' ')}"
         input_move = gets.chomp
-        move_invalid = invalid_move?(input_move)
+        move_valid = valid_move?(input_move, valid_moves)
       rescue ArgumentError
-        #Catches non-number input and betting more than you have
         print "Invalid move #{@name}, please select a valid move from the list #{valid_moves.join(' ')}: "
       end
     end
@@ -142,16 +141,16 @@ class Player
 
   end
 
-  def invalid_move?(move)
+  def valid_move?(move, valid_moves)
     case move.upcase
       when 'S'
-        return false
+        return valid_moves.include?(Move::STAND)
       when 'H'
-        return false
+        return valid_moves.include?(Move::HIT)
       when 'D'
-        return false
+        return valid_moves.include?(Move::DOUBLEDOWN)
       when 'P'
-        return false
+        return valid_moves.include?(Move::SPLIT)
       else
         return true
     end
