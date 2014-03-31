@@ -2,6 +2,15 @@ class Hand
 
   def initialize()
     @cards = []
+    @wager = nil
+  end
+
+  def wager
+    @wager
+  end
+
+  def set_wager(amount)
+    @wager = amount
   end
 
   def cards

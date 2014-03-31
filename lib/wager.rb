@@ -7,8 +7,8 @@ class Wager
       wager_amount = self.get_wager_for_player(curr_player)
 
       if wager_amount >= 1
-        curr_player.place_wager(wager_amount)
         curr_player.new_hands
+        curr_player.place_wager(wager_amount, curr_player.hands[0])
         current_round_players.push(curr_player)
       else
         puts "#{curr_player.name} abstains"

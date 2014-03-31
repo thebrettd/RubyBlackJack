@@ -71,7 +71,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::ACE), false)
@@ -84,7 +84,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(1000)
+    player.place_wager(1000, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::ACE), false)
@@ -97,7 +97,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
@@ -110,13 +110,14 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     player.hands.size.should be == 0
 
-    player.place_wager(5)
-
     hand = Hand.new
     player.add_hand(hand)
     hand.add_card(Card.new(Suit::SPADE, Value::QUEEN), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
     player.hands.size.should be == 1
+
+    player.place_wager(5, hand)
+
 
     player.split_hand(hand,game.shoe)
     player.hands.size.should be == 2
@@ -127,7 +128,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
@@ -141,7 +142,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
@@ -155,7 +156,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
@@ -169,7 +170,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::NINE), false)
@@ -182,7 +183,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::NINE), false)
@@ -196,7 +197,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::TEN), false)
@@ -209,7 +210,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     hand.add_card(ten_spades, false)
@@ -228,7 +229,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
@@ -249,7 +250,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     nine_spades = Card.new(Suit::SPADE, Value::NINE)
     nine_hearts = Card.new(Suit::HEART, Value::NINE)
@@ -270,7 +271,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5, hand)
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
@@ -413,7 +414,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5,hand)
 
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
@@ -432,7 +433,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5,hand)
 
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
@@ -453,7 +454,7 @@ describe Blackjack do
     player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
-    player.place_wager(5)
+    player.place_wager(5,hand)
 
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
     hand.add_card(seven_hearts, false)

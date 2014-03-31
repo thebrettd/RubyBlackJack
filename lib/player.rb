@@ -6,7 +6,6 @@ class Player
     @name = name
     @bankroll = 1000
     @hands = []
-    @wager = nil
     @shoe = shoe
     @dealer = dealer
   end
@@ -44,17 +43,18 @@ class Player
     card = shoe.draw
     hand.add_card(card, true)
 
-    @bankroll -= @wager
-    @wager += @wager
+    @bankroll -= hand.wager
+    hand.set_wager(2*hand.wager)
   end
 
   def split_hand(hand_to_split, shoe)
-    @bankroll -= @wager
-    @wager += @wager
+    @bankroll -= hand_to_split.wager
 
     new_hand = Hand.new
     new_hand.add_card(hand_to_split.cards[1], false)
     add_hand(new_hand)
+
+    new_hand.set_wager(hand_to_split.wager)
 
     hand_to_split.cards.delete_at(1)
     hand_to_split.add_card(shoe.draw, true)
@@ -62,13 +62,9 @@ class Player
     new_hand.add_card(shoe.draw, true)
   end
 
-  def current_wager
-    @wager
-  end
-
-  def place_wager(amount)
-    @wager = amount
+  def place_wager(amount, hand)
     @bankroll -= amount
+    hand.set_wager(amount)
   end
 
   def play_turn

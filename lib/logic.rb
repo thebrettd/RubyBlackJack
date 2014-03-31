@@ -156,12 +156,12 @@ class Logic
         moves.push(Move::HIT)
       end
       #Player can double down if he only has 2 cards and enough money
-      if hand.only_two_cards? && player.bankroll >= player.current_wager
+      if hand.only_two_cards? && player.bankroll >= hand.wager
         moves.push(Move::DOUBLEDOWN)
         #Player can hit if he has a total < 21
       end
       #Player can split if this hand has exactly 2 two cards and are the same
-      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value && player.bankroll >= player.current_wager
+      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value && player.bankroll >= hand.wager
         moves.push(Move::SPLIT)
       end
     end

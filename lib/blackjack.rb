@@ -153,9 +153,13 @@ class Blackjack
       result = Logic.evaluate_hand(hand, @dealer.hands[0])
       if result == Result::PUSH
         puts "\n#{player.name} pushes with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}"
-        player.credit(player.current_wager)
+        player.credit(hand.wager)
+      elsif result == Result::BLACKJACK
+        winnings = hand.wager * (3/2)
+        puts "\nBLACKJACK! #{player.name} wins with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
+        player.credit(winnings)
       elsif result == Result::WIN
-        winnings = player.current_wager * 2
+        winnings = hand.wager * 2
         puts "\n#{player.name} wins with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
         player.credit(winnings)
       else
