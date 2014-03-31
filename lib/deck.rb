@@ -20,7 +20,7 @@ class Deck
     set
   end
 
-  def initialize()
+  def initialize
     @deck = shuffle_deck
   end
 
