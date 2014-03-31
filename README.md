@@ -14,7 +14,7 @@ To launch the game, cd lib/ then ./game.rb
 
 # Controls
 
-Hit - H or h
-Stand - S or s
-Double Down - D or d
-Split - P or p
+* Hit - H or h
+* Stand - S or s
+* Double Down - D or d
+* Split - P or p
