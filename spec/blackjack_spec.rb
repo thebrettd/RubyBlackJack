@@ -299,7 +299,7 @@ describe Blackjack do
     game.dealer.hand.add_card(seven_hearts, false)
 
     game.current_round_players.push(player)
-    game.play_dealer_hand
+    game.dealer.play_hand
 
     game.dealer.hand.size.should be == 2
   end
@@ -316,7 +316,7 @@ describe Blackjack do
 
     game.current_round_players.push(player)
 
-    game.play_dealer_hand
+    game.dealer.play_hand
 
     game.dealer.hand.size.should be >= 3
   end
@@ -374,7 +374,7 @@ describe Blackjack do
     game.dealer.new_hand
     game.dealer.hand.add_card(ace_spades, false)
     game.dealer.hand.add_card(six_hearts, false)
-    game.play_dealer_hand
+    game.dealer.play_hand
     game.dealer.hand.size.should be >= 3
 
     #Dealer hits after complex soft 17
@@ -383,7 +383,7 @@ describe Blackjack do
     game.dealer.hand.add_card(ace_spades, false)
     game.dealer.hand.add_card(three_spades, false)
     game.dealer.hand.add_card(three_spades, false)
-    game.play_dealer_hand
+    game.dealer.play_hand
     game.dealer.hand.size.should be >= 4
 
     #Dealer doesnt after hard 17 that contains 1-valued aces
@@ -393,7 +393,7 @@ describe Blackjack do
     game.dealer.hand.add_card(five_hearts, false)
     game.dealer.hand.add_card(five_hearts, false)
     game.dealer.hand.add_card(ace_spades, false)
-    game.play_dealer_hand
+    game.dealer.play_hand
     game.dealer.hand.size.should be == 4
 
     #Dealer has  two of hearts, ace of clubs, four of diamonds, nine of hearts
@@ -405,7 +405,7 @@ describe Blackjack do
     game.dealer.hand.add_card(ace_spades, false)
     game.dealer.hand.add_card(four_hearts, false)
     game.dealer.hand.add_card(nine_hearts, false)
-    game.play_dealer_hand
+    game.dealer.play_hand
     game.dealer.hand.size.should be >= 5
   end
 

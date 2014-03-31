@@ -56,7 +56,7 @@ class Blackjack
     @player_array = []
     @shoe = Shoe.new(6)
     #todo: use dealer class
-    @dealer = Dealer.new('Dealer', @shoe, @dealer)
+    @dealer = Dealer.new('Dealer', @shoe)
     @current_round_players = []
     Print.newline
     num_players.times do
@@ -81,8 +81,10 @@ class Blackjack
     @current_round_players = Wager.get_player_antes(@player_array)
     deal_cards
     do_all_players_turns
-    play_dealer_hand
-    calculate_results
+    if @current_round_players.length > 0
+      @dealer.play_hand
+      calculate_results
+    end
   end
 
   #Reset dealer's hand
@@ -125,27 +127,6 @@ class Blackjack
   def do_all_players_turns
     @current_round_players.each do |curr_player|
       curr_player.play_turn
-    end
-  end
-
-  #todo: move to dealer class
-  def play_dealer_hand
-    if @current_round_players.size > 0
-      Print.heading('Playing dealer hand!')
-      dealer_hand = @dealer.hand
-      totals = Logic.get_hand_values(dealer_hand)
-      Print.player_score(@dealer, dealer_hand, totals)
-      while !Logic.is_busted?(dealer_hand) && (Logic.seventeen_or_above(totals) == false || Logic.contains_soft_seventeen(dealer_hand))
-        card = @shoe.draw
-        dealer_hand.add_card(card, true)
-        #puts "Dealer draws a #{card}"
-        totals = Logic.get_hand_values(dealer_hand)
-        Print.player_score(@dealer, dealer_hand, totals)
-      end
-
-      if Logic.is_busted?(dealer_hand)
-        puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hand).join(',')}"
-      end
     end
   end
 
