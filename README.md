@@ -9,10 +9,10 @@ House Rules:
 
 # Usage
 
-
+## Starting the game
 To launch the game, cd lib/ then ./game.rb
 
-# Controls
+## Controls
 
 * Hit - H or h
 * Stand - S or s
