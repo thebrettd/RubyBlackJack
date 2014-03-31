@@ -28,5 +28,12 @@ class Print
     puts "#{player.name} has #{player_hand}\nTotals: #{totals.join(',')}"
   end
 
+  def self.dealer_final_score(dealer, dealer_hand)
+    score_str = Logic.is_busted?(dealer_hand) ? "Busted #{Logic.minimum_score(dealer_hand)}" : "Final score: #{Logic.max_under_twenty_two(dealer_hand)}"
+    puts "#{dealer.name} has #{dealer_hand}: #{score_str}"
+  end
+
+
+
 
 end

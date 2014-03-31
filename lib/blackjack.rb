@@ -132,7 +132,7 @@ class Blackjack
 
   def calculate_results
     Print.heading('Results')
-    Print.player_score(@dealer, @dealer.hand, Logic.get_hand_values(@dealer.hand))
+    Print.dealer_final_score(@dealer, @dealer.hand)
 
     @current_round_players.each do |player|
       calculate_results_for_player(player)
@@ -154,7 +154,7 @@ class Blackjack
         puts "\n#{player.name} wins with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
         player.credit(winnings)
       else
-        puts "\n #{player.name} loses with #{hand}! Final Score: #{Logic.losing_score(hand)}"
+        puts "\n#{player.name} loses with #{hand}! Final Score: #{Logic.losing_score(hand)}"
       end
     end
   end
