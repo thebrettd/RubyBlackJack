@@ -1,3 +1,4 @@
+#Card class contains no blackjack specific info
 class Card
 
   def initialize(suit,value)

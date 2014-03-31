@@ -15,7 +15,8 @@ class Hand
   def add_card(card, print)
     @cards.push(card)
     if print
-      puts "Drew a #{card} \nTotals: #{Blackjack.get_hand_values(self).join(",")}"
+      #todo remove blackjack specific logic
+      puts "Drew a #{card} \nTotals: #{Logic.get_hand_values(self).join(",")}"
     end
   end
 

@@ -3,50 +3,24 @@ require 'value'
 require 'shoe'
 require 'move'
 require 'result'
+require 'print'
+require 'logic'
 
 class Blackjack
-
-  #Blackjack should manage the point values for cards, so that card class can be reused for other card games
-  @@point_map = {
-  Value::TWO => [2],
-  Value::THREE => [3],
-  Value::FOUR => [4],
-  Value::FIVE => [5],
-  Value::SIX => [6],
-  Value::SEVEN => [7],
-  Value::EIGHT => [8],
-  Value::NINE => [9],
-  Value::TEN => [10],
-  Value::JACK => [10],
-  Value::QUEEN => [10],
-  Value::KING => [10],
-  Value::ACE => [1,11]
-  }
-
-  def initialize(num_players)
-    @player_array = []
-    @shoe = Shoe.new(6)
-    @dealer = Player.new('Dealer')
-
-    puts "\n"
-    num_players.times do
-      initialize_player(@player_array.length)
-    end
-  end
 
   def dealer
     @dealer
   end
 
+  #Command line driver
   def self.start
-
     puts "\nWelcome to Brett's Blackjack Casino!"
     print 'How many players? '
     num_players = get_number_of_players
     game = Blackjack.new(num_players)
     game.play_game
   end
-
+  #Command line driver helper
   def self.get_number_of_players
     number_invalid = true
     while number_invalid
@@ -59,7 +33,7 @@ class Blackjack
     end
     num_players
   end
-
+  #Command line driver helper
   def self.number_valid?(number)
     if number <= 0
       raise ArgumentError
@@ -67,76 +41,37 @@ class Blackjack
     false
   end
 
+  def initialize(num_players)
+    @player_array = []
+    @shoe = Shoe.new(6)
+    #todo: use dealer class
+    @dealer = Player.new('Dealer')
+
+    Print.newline
+    num_players.times do
+      initialize_player(@player_array.length)
+    end
+  end
+
+  def initialize_player(player_num)
+    print "Enter player #{player_num}'s name: "
+    player = Player.new(gets.chomp)
+    @player_array.push(player)
+  end
+
+  #Main game loop. Exit when all the money is gone
   def play_game
     while @player_array.select{ |player| player.bankroll > 0 }.length > 0
       play_round
       puts "\nRound over, press any key to continue to next round"
       gets
     end
-
     game_over
-
   end
 
   def game_over
     puts 'All players our of money!'
     puts 'Game Over!'
-  end
-
-  #Return array of all distinct hand values. Ace counts as 1 or 11
-  def self.get_hand_values(hand)
-    totals = [0]
-    hand.cards.each do |card|
-      card_points = self.get_card_value(card)
-      if card_points.size == 2
-        #Add a value of 1 to all known sums
-        one_totals = totals.map { |old_total| old_total + card_points[0] }
-        #Add a value of 11 to all known sums
-        eleven_totals = totals.map { |old_total| old_total + card_points[1] }
-        #Combine 11-ace and 1-ace totals
-        totals = one_totals + eleven_totals
-      else
-        #Non-ace, just add the value to all known sums
-        totals.map! { |old_total| old_total + card_points[0] }
-      end
-    end
-    totals.uniq
-  end
-
-  #Same logic as above, but return true if any 11-valued ace results in a sum of 17.
-  def self.contains_soft_seventeen(hand)
-
-    if hand.cards.select { |card| card.value == Value::ACE }.length == 0
-      return false
-    end
-
-    totals = [0]
-    soft_totals = []
-    hand.cards.each do |card|
-      card_points = self.get_card_value(card)
-      if card_points.size == 2
-        #Add a value of 1 to all known sums
-        one_totals = totals.map { |old_total| old_total + card_points[0] }
-        #Add a value of 11 to all known sums
-        eleven_totals = totals.map { |old_total| old_total + card_points[1] }
-        soft_totals = soft_totals + eleven_totals
-        #Combine 11-ace and 1-ace totals
-        totals = one_totals + eleven_totals
-      else
-        #Non-ace, just add the value to all known sums
-        totals.map! { |old_total| old_total + card_points[0] }
-        soft_totals.map! { |old_total| old_total + card_points[0] }
-      end
-    end
-
-    return soft_totals.select {|value| value == 17}.length > 0
-
-  end
-
-  def initialize_player(player_num)
-      print "Enter player #{player_num}'s name: "
-      player = Player.new(gets.chomp)
-      @player_array.push(player)
   end
 
   def play_round
@@ -148,8 +83,13 @@ class Blackjack
     resolve_hands
   end
 
+  #Deal initial cards to all players in the following order
+  # All players get one card - exposed
+  # Dealer gets one card - hidden
+  # All players get one card - exposed
+  # Dealer gets one card - hidden
   def deal_cards
-    heading('Dealing initial cards')
+    Print.heading('Dealing initial cards')
     deal_card_to_players
     deal_card(@dealer, @shoe.draw, false) #false to hide first dealer card
     deal_card_to_players
@@ -157,67 +97,42 @@ class Blackjack
   end
 
   def resolve_hands
-    evaluate_dealer_hand
+    play_dealer_hand
     evalute_all_players_hands
   end
 
   def evalute_all_players_hands
-    heading('Results')
+    Print.heading('Results')
 
-    dealer_score(Blackjack.get_hand_values(@dealer.hands[0]))
+    dealer_score(Logic.get_hand_values(@dealer.hands[0]))
 
     @current_round_players.each do |player|
       detemine_results(player)
     end
   end
 
-  def heading(title)
-    newline
-    puts "#{title}"
-    line
-  end
-
-  def self.seventeen_or_above(totals)
-    totals.select { |total| total >= 17 && total <= 21 }.length > 0
-  end
-
-  def evaluate_dealer_hand
-    heading('Playing dealer hand!')
-    totals = Blackjack.get_hand_values(@dealer.hands[0])
+  #todo: move to dealer class
+  def play_dealer_hand
+    dealer_hand = @dealer.hands[0]
+    Print.heading('Playing dealer hand!')
+    totals = Logic.get_hand_values(dealer_hand)
     dealer_score(totals)
-    while !dealer_busted && (Blackjack.seventeen_or_above(totals) == false || Blackjack.contains_soft_seventeen(@dealer.hands[0]))
+    while !Logic.is_busted?(dealer_hand) && (Logic.seventeen_or_above(totals) == false || Logic.contains_soft_seventeen(dealer_hand))
       card = @shoe.draw
-      @dealer.hands[0].add_card(card, true)
+      dealer_hand.add_card(card, true)
       #puts "Dealer draws a #{card}"
-      totals = Blackjack.get_hand_values(@dealer.hands[0])
+      totals = Logic.get_hand_values(dealer_hand)
       dealer_score(totals)
-
     end
 
-    if dealer_busted
-      puts "Dealer busts with #{@dealer.hands[0]} values: #{Blackjack.get_hand_values(@dealer.hands[0]).join(',')}"
+    if Logic.is_busted?(dealer_hand)
+      puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hands[0]).join(',')}"
     end
 
   end
 
   def dealer_score(totals)
     puts "Dealer has #{@dealer.hands[0]}\nTotals: #{totals.join(',')}"
-  end
-
-  def line
-    puts "--------------------"
-  end
-
-  def dealer_busted
-    Blackjack.get_hand_values(@dealer.hands[0]).select { |total| total <= 21 }.size == 0
-  end
-
-  def max_under_twenty_two(hand)
-    Blackjack.get_hand_values(hand).select{|total| total <= 21 }.max
-  end
-
-  def minimum_score(hand)
-    Blackjack.get_hand_values(hand).min
   end
 
   def losing_score(hand)
@@ -246,12 +161,12 @@ class Blackjack
   end
 
   def evaluate_hand(hand)
-    dealers_totals = Blackjack.get_hand_values(@dealer.hands[0])
-    player_totals = Blackjack.get_hand_values(hand)
+    dealers_totals = Logic.get_hand_values(@dealer.hands[0])
+    player_totals = Logic.get_hand_values(hand)
     dealer_bust = dealers_totals.min > 21
     player_bust = player_totals.min > 21
-    dealers_best = Blackjack.get_hand_values(@dealer.hands[0]).select { |total| total <= 21}.max
-    players_best = Blackjack.get_hand_values(hand).select { |total| total <= 21}.max
+    dealers_best = Logic.get_hand_values(@dealer.hands[0]).select { |total| total <= 21}.max
+    players_best = Logic.get_hand_values(hand).select { |total| total <= 21}.max
 
     if player_bust
       return Result::LOSE
@@ -296,7 +211,7 @@ class Blackjack
   end
 
   def do_player_turn(player)
-    heading("Playing hands for #{player.name}")
+    Print.heading("Playing hands for #{player.name}")
     player.hands.each do |hand|
       play_player_hand(player, hand)
     end
@@ -304,14 +219,14 @@ class Blackjack
 
   def play_player_hand(player, hand)
     while true
-      puts "#{player.name} has: #{hand} \nTotals: #{Blackjack.get_hand_values(hand).join(',')}"
+      puts "#{player.name} has: #{hand} \nTotals: #{Logic.get_hand_values(hand).join(',')}"
       puts "Dealer shows: #{@dealer.hands[0].cards[1]}"
       move = get_player_move(player,hand)
 
       handle_move(player, hand, move)
       if is_busted?(hand)
         puts "#{player.name}: Busted! :("
-        newline
+        Print.newline
         break
       elsif move == Move::STAND || move == Move::DOUBLEDOWN
         break;
@@ -319,13 +234,6 @@ class Blackjack
     end
   end
 
-  def newline
-    puts "\n"
-  end
-
-  def is_busted?(hand)
-    Blackjack.get_hand_values(hand).select { |total| total <= 21}.length == 0
-  end
 
   def get_player_move(player, hand)
     valid_moves = compute_valid_moves(player, hand)
@@ -389,7 +297,7 @@ class Blackjack
   end
 
   def stand(hand, player)
-    puts "#{player.name} stands! Totals: #{Blackjack.get_hand_values(hand).join(",")}"
+    puts "#{player.name} stands! Totals: #{Logic.get_hand_values(hand).join(",")}"
   end
 
   def hit(hand, player)
@@ -410,7 +318,7 @@ class Blackjack
   def compute_valid_moves(player, hand)
     moves = [Move::STAND]
 
-    totals = Blackjack.get_hand_values(hand)
+    totals = Logic.get_hand_values(hand)
     #Don't allow hit if player has 21 (You're welcome)
     if totals.select{ |total| total == 21}.length >= 1
       #noop
@@ -432,7 +340,7 @@ class Blackjack
   end
 
   def get_player_antes
-    heading('Wagers')
+    Print.heading('Wagers')
     @player_array.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
       wager_amount = get_wager_for_player(curr_player)
@@ -464,9 +372,6 @@ class Blackjack
     wager_amount
   end
 
-  def self.get_card_value(card)
-    @@point_map[card.value]
-  end
 
   def invalid_wager?(curr_player, wager_amount)
     if wager_amount > curr_player.bankroll
@@ -474,6 +379,7 @@ class Blackjack
     end
     false
   end
+
 
 end
 
