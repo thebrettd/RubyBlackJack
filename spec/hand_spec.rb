@@ -2,6 +2,7 @@ require 'lib/hand'
 require 'lib/card'
 require 'lib/suit'
 require 'lib/value'
+require 'lib/blackjack'
 
 describe Hand do
 
@@ -31,6 +32,28 @@ describe Hand do
     hand.only_two_cards?.should eq(true)
     hand.add_card(card, false)
     hand.only_two_cards?.should eq(false)
+  end
+
+  it 'should have a nil wager' do
+    hand = Hand.new
+    hand.wager.nil?.should eq(true)
+  end
+
+  it 'should have a non-nil wager after placing wagering' do
+    hand = Hand.new
+    hand.set_wager(5)
+    hand.wager.should eq(5)
+  end
+
+  it 'bankroll should decrease after placing wagering' do
+    game = Blackjack.new(1)
+    player = Player.new('Test Player',game.shoe, game.dealer)
+
+    hand = Hand.new
+
+    player.place_wager(5, hand)
+
+    player.bankroll.should eq(995)
   end
 
 end

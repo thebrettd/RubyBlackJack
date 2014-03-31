@@ -32,26 +32,6 @@ describe Player do
     player.hands[0].cards.size.should eq(0)
   end
 
-  it 'should have a nil wager' do
-    game = Blackjack.new(1)
-    player = Player.new('Test Player',game.shoe, game.dealer)
-    player.current_wager.nil?.should eq(true)
-  end
-
-  it 'should have a non-nil wager after placing wagering' do
-    game = Blackjack.new(1)
-    player = Player.new('Test Player',game.shoe, game.dealer)
-    player.place_wager(5)
-    player.current_wager.should eq(5)
-  end
-
-  it 'bankroll should decrease after placing wagering' do
-    game = Blackjack.new(1)
-    player = Player.new('Test Player',game.shoe, game.dealer)
-    player.place_wager(5)
-    player.bankroll.should eq(995)
-  end
-
   it 'hand size should increase after hitting' do
     game = Blackjack.new(1)
     player = Player.new('Test Player',game.shoe, game.dealer)
