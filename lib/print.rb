@@ -11,9 +11,13 @@ class Print
     puts "--------------------"
   end
 
-
   def self.newline
     puts "\n"
+  end
+
+  def self.game_over
+    puts 'All players our of money!'
+    puts 'Game Over!'
   end
 
 

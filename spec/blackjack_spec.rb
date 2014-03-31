@@ -76,7 +76,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::ACE), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN, Move::SPLIT])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN, Move::SPLIT])
   end
 
   it 'should not allow splitting when the player lacks funds' do
@@ -89,7 +89,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::ACE), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
   end
 
   it 'should not allow splitting when both cards are not the same' do
@@ -102,7 +102,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN])
   end
 
   it 'splitting should increase the number of players hands by one' do
@@ -150,7 +150,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND])
   end
 
   it 'Should not allow double down if more than 2 cards' do
@@ -164,7 +164,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND])
   end
 
   it 'Soft 20 allow double down' do
@@ -177,7 +177,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::NINE), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN ])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT, Move::DOUBLEDOWN ])
   end
 
   it 'Allow hitting if any hand total < 21 (i.e 11 ace busts but 1 ace does not)' do
@@ -191,7 +191,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::HEART, Value::NINE), false)
     hand.add_card(Card.new(Suit::SPADE, Value::TWO), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND, Move::HIT])
   end
 
   it 'Doesnt allow hitting if total is 21' do
@@ -204,7 +204,7 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::ACE), false)
     hand.add_card(Card.new(Suit::HEART, Value::TEN), false)
 
-    game.compute_valid_moves(player, hand).should eq([Move::STAND])
+    Logic.compute_valid_moves(player, hand).should eq([Move::STAND])
   end
 
   it 'Same cards should push' do

@@ -95,4 +95,28 @@ class Logic
       Value::ACE => [1,11]
   }
 
+  def self.compute_valid_moves(player, hand)
+    moves = [Move::STAND]
+
+    totals = Logic.get_hand_values(hand)
+    #Don't allow hit if player has 21 (You're welcome)
+    if totals.select{ |total| total == 21}.length >= 1
+      #noop
+    else
+      if totals.select{ |total| total < 21}.length >= 1
+        moves.push(Move::HIT)
+      end
+      #Player can double down if he only has 2 cards and enough money
+      if hand.only_two_cards? && player.bankroll >= player.current_wager
+        moves.push(Move::DOUBLEDOWN)
+        #Player can hit if he has a total < 21
+      end
+      #Player can split if this hand has exactly 2 two cards and are the same
+      if hand.only_two_cards? && hand.cards[0].value == hand.cards[1].value && player.bankroll >= player.current_wager
+        moves.push(Move::SPLIT)
+      end
+    end
+    moves
+  end
+
 end
