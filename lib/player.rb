@@ -69,8 +69,11 @@ class Player
 
   def play_turn
     Print.heading("Playing hands for #{@name}")
+    hand_number = 0
     @hands.each do |hand|
+      Print.heading("Playing hand #{hand_number} for #{@name}")
       play_hand(hand)
+      hand_number += 1
     end
   end
 
