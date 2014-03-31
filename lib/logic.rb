@@ -68,6 +68,10 @@ class Logic
     Logic.get_hand_values(hand).select{|total| total <= 21 }.max
   end
 
+  def self.blackjack(hand)
+    hand.size == 2 && Logic.get_hand_values(hand).select{|total| total == 21 }.size > 0
+  end
+
   def self.minimum_score(hand)
     Logic.get_hand_values(hand).min
   end
@@ -84,6 +88,10 @@ class Logic
     end
   end
 
+  #Closest to 21 without going over wins.
+  #Most ties result in push except as follows:
+  #Blackjack (2-card 21) trumps 3+ card twenty one.
+  #Player && Dealer blackjack is a push
   def self.evaluate_hand(hand, dealer_hand)
     dealers_totals = Logic.get_hand_values(dealer_hand)
     player_totals = Logic.get_hand_values(hand)
@@ -92,6 +100,9 @@ class Logic
 
     dealers_best = Logic.max_under_twenty_two(dealer_hand)
     players_best = Logic.max_under_twenty_two(hand)
+
+    dealer_blackjack = Logic.blackjack(dealer_hand)
+    player_blackjack = Logic.blackjack(hand)
 
     if player_bust
       return Result::LOSE
@@ -102,7 +113,13 @@ class Logic
     elsif players_best > dealers_best
       return Result::WIN
     elsif players_best == dealers_best
-      return Result::PUSH
+      if dealer_blackjack && !player_blackjack
+        return Result::LOSE
+      elsif player_blackjack && !dealer_blackjack
+        return Result::BLACKJACK
+      else
+        return Result::PUSH
+      end
     end
   end
 

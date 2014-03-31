@@ -424,6 +424,48 @@ describe Blackjack do
     game.dealer.hands[0].add_card(ace_spades, false)
     game.dealer.hands[0].add_card(queen_hearts, false)
 
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::PUSH)
+  end
+
+  it 'player blackjack dealer twentyone should blackjack' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    ace_spades = Card.new(Suit::SPADE, Value::ACE)
+    queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
+    hand.add_card(ace_spades, false)
+    hand.add_card(queen_hearts, false)
+
+    seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
+    game.dealer.new_hands
+    game.dealer.hands[0].add_card(seven_hearts, false)
+    game.dealer.hands[0].add_card(seven_hearts, false)
+    game.dealer.hands[0].add_card(seven_hearts, false)
+
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::BLACKJACK)
+  end
+
+  it 'dealer blackjack player twentyone should lose' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
+    hand.add_card(seven_hearts, false)
+    hand.add_card(seven_hearts, false)
+    hand.add_card(seven_hearts, false)
+
+    ace_spades = Card.new(Suit::SPADE, Value::ACE)
+    queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
+    game.dealer.new_hands
+    game.dealer.hands[0].add_card(ace_spades, false)
+    game.dealer.hands[0].add_card(queen_hearts, false)
+
     Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::LOSE)
   end
 
