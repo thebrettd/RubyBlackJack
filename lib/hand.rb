@@ -25,7 +25,7 @@ class Hand
     @cards.push(card)
     if print
       #todo remove blackjack specific logic
-      puts "Drew a #{card} \nTotals: #{Logic.get_hand_values(self).join(",")}"
+      puts "Drew a #{card} \n"
     end
   end
 

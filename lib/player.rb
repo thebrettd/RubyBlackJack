@@ -118,7 +118,7 @@ class Player
     move_valid = false
     while !move_valid
       begin
-        puts "\nEnter the first letter of a move from the list (Or P to split): #{valid_moves.join(' ')}"
+        puts "\nEnter the first letter of a move from the list (Or p to split): #{valid_moves.join(' ')}"
         input_move = gets.chomp
         move_valid = valid_move?(input_move, valid_moves)
       rescue ArgumentError
@@ -152,7 +152,7 @@ class Player
       when 'P'
         return valid_moves.include?(Move::SPLIT)
       else
-        return true
+        return false
     end
   end
 
