@@ -15,6 +15,10 @@ class Print
     puts "\n"
   end
 
+  def self.round_over
+    puts "\nRound over, press any key to continue to next round"
+  end
+
   def self.game_over
     puts 'All players our of money!'
     puts 'Game Over!'

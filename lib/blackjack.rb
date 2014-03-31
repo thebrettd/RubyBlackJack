@@ -23,12 +23,13 @@ class Blackjack
 
   #Command line driver
   def self.start
-    puts "\nWelcome to Brett's Blackjack Casino!"
+    Print.heading("Welcome to Brett's Blackjack Casino!")
     print 'How many players? '
     num_players = get_number_of_players
     game = Blackjack.new(num_players)
     game.play_game
   end
+
   #Command line driver helper
   def self.get_number_of_players
     number_invalid = true
@@ -68,7 +69,7 @@ class Blackjack
   def play_game
     while @player_array.select{ |player| player.bankroll > 0 }.length > 0
       play_round
-      puts "\nRound over, press any key to continue to next round"
+      Print.round_over
       gets
     end
     Print.game_over
@@ -96,25 +97,23 @@ class Blackjack
   def deal_cards
     Print.heading('Dealing initial cards')
     deal_card_to_players
-    deal_card(@dealer, @shoe.draw, false) #false to hide first dealer card
+    dealer_card_to_dealer(false) #false to hide first dealer card
     deal_card_to_players
-    deal_card(@dealer, @shoe.draw, true)
+    dealer_card_to_dealer(true)
+  end
+
+  def dealer_card_to_dealer(show)
+    deal_card(@dealer, @shoe.draw, show)
   end
 
   def deal_card_to_players
-    @current_round_players.length.times do |curr_player_number|
-      curr_player = get_player_by_number(curr_player_number)
+    @current_round_players.each do |curr_player|
       deal_card(curr_player, @shoe.draw, true)
     end
   end
 
-  def get_player_by_number(curr_player_number)
-    @player_array[curr_player_number]
-  end
-
   def do_all_players_turns
-    @current_round_players.length.times do |curr_player_number|
-      curr_player = get_player_by_number(curr_player_number)
+    @current_round_players.each do |curr_player|
       curr_player.play_turn
     end
   end
