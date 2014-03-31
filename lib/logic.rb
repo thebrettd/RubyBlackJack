@@ -104,9 +104,7 @@ class Logic
     dealer_blackjack = Logic.blackjack(dealer_hand)
     player_blackjack = Logic.blackjack(hand)
 
-    if player_bust
-      return Result::LOSE
-    elsif dealer_blackjack && !player_blackjack
+    if player_bust || dealer_blackjack && !player_blackjack
       return Result::LOSE
     elsif player_blackjack && !dealer_blackjack
       return Result::BLACKJACK
@@ -116,7 +114,7 @@ class Logic
       return Result::LOSE
     elsif players_best > dealers_best
       return Result::WIN
-    elsif (player_blackjack && dealer_blackjack) || (players_best == dealers_best)
+    elsif players_best == dealers_best
       return Result::PUSH
     end
   end
