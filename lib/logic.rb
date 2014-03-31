@@ -106,20 +106,18 @@ class Logic
 
     if player_bust
       return Result::LOSE
+    elsif dealer_blackjack && !player_blackjack
+      return Result::LOSE
+    elsif player_blackjack && !dealer_blackjack
+      return Result::BLACKJACK
     elsif dealer_bust
       return Result::WIN
     elsif dealers_best > players_best
       return Result::LOSE
     elsif players_best > dealers_best
       return Result::WIN
-    elsif players_best == dealers_best
-      if dealer_blackjack && !player_blackjack
-        return Result::LOSE
-      elsif player_blackjack && !dealer_blackjack
-        return Result::BLACKJACK
-      else
-        return Result::PUSH
-      end
+    elsif (player_blackjack && dealer_blackjack) || (players_best == dealers_best)
+      return Result::PUSH
     end
   end
 
