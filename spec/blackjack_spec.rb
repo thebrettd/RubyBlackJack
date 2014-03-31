@@ -217,11 +217,11 @@ describe Blackjack do
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     hand.add_card(ten_hearts, false)
 
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ten_spades, false)
-    game.dealer.hands[0].add_card(ten_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ten_spades, false)
+    game.dealer.hand.add_card(ten_hearts, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::PUSH)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::PUSH)
   end
 
   it 'Players 20 versus 18 should win' do
@@ -238,11 +238,11 @@ describe Blackjack do
 
     nine_spades = Card.new(Suit::SPADE, Value::NINE)
     nine_hearts = Card.new(Suit::HEART, Value::NINE)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(nine_spades, false)
-    game.dealer.hands[0].add_card(nine_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(nine_spades, false)
+    game.dealer.hand.add_card(nine_hearts, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::WIN)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::WIN)
   end
 
   it 'Player 18 dealer 20 loses' do
@@ -259,11 +259,11 @@ describe Blackjack do
 
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ten_hearts, false)
-    game.dealer.hands[0].add_card(ten_spades, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ten_hearts, false)
+    game.dealer.hand.add_card(ten_spades, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::LOSE)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::LOSE)
   end
 
   it 'dealer bust player anything should win' do
@@ -280,12 +280,12 @@ describe Blackjack do
 
     ten_hearts = Card.new(Suit::HEART, Value::TEN)
     six_spade = Card.new(Suit::SPADE, Value::SIX)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ten_hearts, false)
-    game.dealer.hands[0].add_card(six_spade, false)
-    game.dealer.hands[0].add_card(six_spade, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ten_hearts, false)
+    game.dealer.hand.add_card(six_spade, false)
+    game.dealer.hand.add_card(six_spade, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::WIN)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::WIN)
   end
 
   it 'dealer should stand on hard 17' do
@@ -294,14 +294,14 @@ describe Blackjack do
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ten_spades, false)
-    game.dealer.hands[0].add_card(seven_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ten_spades, false)
+    game.dealer.hand.add_card(seven_hearts, false)
 
     game.current_round_players.push(player)
     game.play_dealer_hand
 
-    game.dealer.hands[0].size.should be == 2
+    game.dealer.hand.size.should be == 2
   end
 
   it 'dealer should hit on 16' do
@@ -310,15 +310,15 @@ describe Blackjack do
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(six_hearts, false)
-    game.dealer.hands[0].add_card(ten_spades, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(six_hearts, false)
+    game.dealer.hand.add_card(ten_spades, false)
 
     game.current_round_players.push(player)
 
     game.play_dealer_hand
 
-    game.dealer.hands[0].size.should be >= 3
+    game.dealer.hand.size.should be >= 3
   end
 
   it 'can detect soft 17' do
@@ -327,38 +327,38 @@ describe Blackjack do
     #Simple soft 17
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(six_hearts, false)
-    Logic.contains_soft_seventeen(game.dealer.hands[0]).should eq(true)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(six_hearts, false)
+    Logic.contains_soft_seventeen(game.dealer.hand).should eq(true)
 
     #Complex soft 17
-    game.dealer.new_hands
+    game.dealer.new_hand
     three_spades = Card.new(Suit::HEART, Value::THREE)
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(three_spades, false)
-    game.dealer.hands[0].add_card(three_spades, false)
-    Logic.contains_soft_seventeen(game.dealer.hands[0]).should eq(true)
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(three_spades, false)
+    game.dealer.hand.add_card(three_spades, false)
+    Logic.contains_soft_seventeen(game.dealer.hand).should eq(true)
 
     #hard 17 that contains 1-valued aces
-    game.dealer.new_hands
+    game.dealer.new_hand
     five_hearts = Card.new(Suit::HEART, Value::FIVE)
-    game.dealer.hands[0].add_card(six_hearts, false)
-    game.dealer.hands[0].add_card(five_hearts, false)
-    game.dealer.hands[0].add_card(five_hearts, false)
-    game.dealer.hands[0].add_card(ace_spades, false)
-    Logic.contains_soft_seventeen(game.dealer.hands[0]).should eq(false)
+    game.dealer.hand.add_card(six_hearts, false)
+    game.dealer.hand.add_card(five_hearts, false)
+    game.dealer.hand.add_card(five_hearts, false)
+    game.dealer.hand.add_card(ace_spades, false)
+    Logic.contains_soft_seventeen(game.dealer.hand).should eq(false)
 
     #Dealer has  two of hearts, ace of clubs, four of diamonds, nine of hearts
-    game.dealer.new_hands
+    game.dealer.new_hand
     two_hearts = Card.new(Suit::HEART, Value::TWO)
     four_hearts = Card.new(Suit::HEART, Value::FOUR)
     nine_hearts = Card.new(Suit::HEART, Value::NINE)
-    game.dealer.hands[0].add_card(two_hearts, false)
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(four_hearts, false)
-    game.dealer.hands[0].add_card(nine_hearts, false)
-    Logic.contains_soft_seventeen(game.dealer.hands[0]).should eq(false)
+    game.dealer.hand.add_card(two_hearts, false)
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(four_hearts, false)
+    game.dealer.hand.add_card(nine_hearts, false)
+    Logic.contains_soft_seventeen(game.dealer.hand).should eq(false)
 
   end
 
@@ -371,42 +371,42 @@ describe Blackjack do
     #Dealer hits after simple soft 17
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(six_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(six_hearts, false)
     game.play_dealer_hand
-    game.dealer.hands[0].size.should be >= 3
+    game.dealer.hand.size.should be >= 3
 
     #Dealer hits after complex soft 17
-    game.dealer.new_hands
+    game.dealer.new_hand
     three_spades = Card.new(Suit::HEART, Value::THREE)
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(three_spades, false)
-    game.dealer.hands[0].add_card(three_spades, false)
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(three_spades, false)
+    game.dealer.hand.add_card(three_spades, false)
     game.play_dealer_hand
-    game.dealer.hands[0].size.should be >= 4
+    game.dealer.hand.size.should be >= 4
 
     #Dealer doesnt after hard 17 that contains 1-valued aces
-    game.dealer.new_hands
+    game.dealer.new_hand
     five_hearts = Card.new(Suit::HEART, Value::FIVE)
-    game.dealer.hands[0].add_card(six_hearts, false)
-    game.dealer.hands[0].add_card(five_hearts, false)
-    game.dealer.hands[0].add_card(five_hearts, false)
-    game.dealer.hands[0].add_card(ace_spades, false)
+    game.dealer.hand.add_card(six_hearts, false)
+    game.dealer.hand.add_card(five_hearts, false)
+    game.dealer.hand.add_card(five_hearts, false)
+    game.dealer.hand.add_card(ace_spades, false)
     game.play_dealer_hand
-    game.dealer.hands[0].size.should be == 4
+    game.dealer.hand.size.should be == 4
 
     #Dealer has  two of hearts, ace of clubs, four of diamonds, nine of hearts
-    game.dealer.new_hands
+    game.dealer.new_hand
     two_hearts = Card.new(Suit::HEART, Value::TWO)
     four_hearts = Card.new(Suit::HEART, Value::FOUR)
     nine_hearts = Card.new(Suit::HEART, Value::NINE)
-    game.dealer.hands[0].add_card(two_hearts, false)
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(four_hearts, false)
-    game.dealer.hands[0].add_card(nine_hearts, false)
+    game.dealer.hand.add_card(two_hearts, false)
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(four_hearts, false)
+    game.dealer.hand.add_card(nine_hearts, false)
     game.play_dealer_hand
-    game.dealer.hands[0].size.should be >= 5
+    game.dealer.hand.size.should be >= 5
   end
 
   it 'dealer blackjack player blackjack should push' do
@@ -421,11 +421,11 @@ describe Blackjack do
     hand.add_card(ace_spades, false)
     hand.add_card(queen_hearts, false)
 
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(queen_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(queen_hearts, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::PUSH)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::PUSH)
   end
 
   it 'player blackjack dealer twentyone should blackjack' do
@@ -441,12 +441,12 @@ describe Blackjack do
     hand.add_card(queen_hearts, false)
 
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(seven_hearts, false)
-    game.dealer.hands[0].add_card(seven_hearts, false)
-    game.dealer.hands[0].add_card(seven_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(seven_hearts, false)
+    game.dealer.hand.add_card(seven_hearts, false)
+    game.dealer.hand.add_card(seven_hearts, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::BLACKJACK)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::BLACKJACK)
   end
 
   it 'dealer blackjack player twentyone should lose' do
@@ -463,11 +463,11 @@ describe Blackjack do
 
     ace_spades = Card.new(Suit::SPADE, Value::ACE)
     queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
-    game.dealer.new_hands
-    game.dealer.hands[0].add_card(ace_spades, false)
-    game.dealer.hands[0].add_card(queen_hearts, false)
+    game.dealer.new_hand
+    game.dealer.hand.add_card(ace_spades, false)
+    game.dealer.hand.add_card(queen_hearts, false)
 
-    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::LOSE)
+    Logic.evaluate_hand(hand, game.dealer.hand).should eq(Result::LOSE)
   end
 
 end

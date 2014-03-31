@@ -6,6 +6,7 @@ require 'result'
 require 'print'
 require 'logic'
 require 'wager'
+require 'dealer'
 
 class Blackjack
 
@@ -55,7 +56,7 @@ class Blackjack
     @player_array = []
     @shoe = Shoe.new(6)
     #todo: use dealer class
-    @dealer = Player.new('Dealer', @shoe, @dealer)
+    @dealer = Dealer.new('Dealer', @shoe, @dealer)
     @current_round_players = []
     Print.newline
     num_players.times do
@@ -86,7 +87,7 @@ class Blackjack
 
   #Reset dealer's hand
   def reset
-    @dealer.new_hands
+    @dealer.new_hand
   end
 
   #Deal initial cards to all players in the following order
@@ -103,12 +104,21 @@ class Blackjack
   end
 
   def dealer_card_to_dealer(show)
-    deal_card(@dealer, @shoe.draw, show)
+    deal_card_to_dealer(@dealer, @shoe.draw, show)
+  end
+
+  def deal_card_to_dealer(dealer, card, show)
+    if show
+      puts "Dealing to #{dealer.name}: #{card}"
+    elsif
+    puts "Dealing hidden card to #{dealer.name}"
+    end
+    dealer.hand.add_card(card, false)
   end
 
   def deal_card_to_players
     @current_round_players.each do |curr_player|
-      deal_card(curr_player, @shoe.draw, true)
+      deal_card_to_player(curr_player, @shoe.draw, true)
     end
   end
 
@@ -122,7 +132,7 @@ class Blackjack
   def play_dealer_hand
     if @current_round_players.size > 0
       Print.heading('Playing dealer hand!')
-      dealer_hand = @dealer.hands[0]
+      dealer_hand = @dealer.hand
       totals = Logic.get_hand_values(dealer_hand)
       Print.player_score(@dealer, dealer_hand, totals)
       while !Logic.is_busted?(dealer_hand) && (Logic.seventeen_or_above(totals) == false || Logic.contains_soft_seventeen(dealer_hand))
@@ -134,14 +144,14 @@ class Blackjack
       end
 
       if Logic.is_busted?(dealer_hand)
-        puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hands[0]).join(',')}"
+        puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hand).join(',')}"
       end
     end
   end
 
   def calculate_results
     Print.heading('Results')
-    Print.player_score(@dealer, @dealer.hands[0], Logic.get_hand_values(@dealer.hands[0]))
+    Print.player_score(@dealer, @dealer.hand, Logic.get_hand_values(@dealer.hand))
 
     @current_round_players.each do |player|
       calculate_results_for_player(player)
@@ -150,7 +160,7 @@ class Blackjack
 
   def calculate_results_for_player(player)
     player.hands.each do |hand|
-      result = Logic.evaluate_hand(hand, @dealer.hands[0])
+      result = Logic.evaluate_hand(hand, @dealer.hand)
       if result == Result::PUSH
         puts "\n#{player.name} pushes with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}"
         player.credit(hand.wager)
@@ -169,7 +179,7 @@ class Blackjack
   end
 
   #Adds the card to a player (does not draw card)
-  def deal_card(player, card, show)
+  def deal_card_to_player(player, card, show)
     if show
       puts "Dealing to #{player.name}: #{card}"
     elsif

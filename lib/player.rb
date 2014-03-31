@@ -80,7 +80,7 @@ class Player
   def play_hand(hand)
     while true
       puts "#{@name} has: #{hand} \nTotals: #{Logic.get_hand_values(hand).join(',')}"
-      puts "Dealer shows: #{@dealer.hands[0].cards[1]}"
+      puts "Dealer shows: #{@dealer.hand.cards[1]}"
       move = get_player_move(hand)
 
       handle_move(hand, move)
