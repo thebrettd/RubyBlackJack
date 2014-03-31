@@ -61,14 +61,14 @@ describe Blackjack do
 
   it 'should throw argument error when you wager more than you have' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
 
     expect {game.invalid_wager?(player, 1001)}.to raise_error
   end
 
   it 'should allow splitting when both cards are the same' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -81,7 +81,7 @@ describe Blackjack do
 
   it 'should not allow splitting when the player lacks funds' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(1000)
@@ -94,7 +94,7 @@ describe Blackjack do
 
   it 'should not allow splitting when both cards are not the same' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -107,7 +107,7 @@ describe Blackjack do
 
   it 'splitting should increase the number of players hands by one' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     player.hands.size.should be == 0
 
     player.place_wager(5)
@@ -118,13 +118,13 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
     player.hands.size.should be == 1
 
-    game.split_hand(hand,player)
+    player.split_hand(hand,game.shoe)
     player.hands.size.should be == 2
   end
 
   it 'splitting should decrease the bankroll by initial wager' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -132,16 +132,13 @@ describe Blackjack do
     hand.add_card(Card.new(Suit::SPADE, Value::KING), false)
     hand.add_card(Card.new(Suit::HEART, Value::QUEEN), false)
 
-    game.split_hand(hand,player)
-
+    player.split_hand(hand,game.shoe)
     player.bankroll.should be == 990
   end
 
-
-
   it 'Should not allow hit if busted' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -155,7 +152,7 @@ describe Blackjack do
 
   it 'Should not allow double down if more than 2 cards' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -169,7 +166,7 @@ describe Blackjack do
 
   it 'Soft 20 allow double down' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -182,7 +179,7 @@ describe Blackjack do
 
   it 'Allow hitting if any hand total < 21 (i.e 11 ace busts but 1 ace does not)' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -196,7 +193,7 @@ describe Blackjack do
 
   it 'Doesnt allow hitting if total is 21' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -209,7 +206,7 @@ describe Blackjack do
 
   it 'Same cards should push' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -223,12 +220,12 @@ describe Blackjack do
     game.dealer.hands[0].add_card(ten_spades, false)
     game.dealer.hands[0].add_card(ten_hearts, false)
 
-    game.evaluate_hand(hand).should eq(Result::PUSH)
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::PUSH)
   end
 
   it 'Players 20 versus 18 should win' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -244,12 +241,12 @@ describe Blackjack do
     game.dealer.hands[0].add_card(nine_spades, false)
     game.dealer.hands[0].add_card(nine_hearts, false)
 
-    game.evaluate_hand(hand).should eq(Result::WIN)
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::WIN)
   end
 
   it 'Player 18 dealer 20 loses' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -265,12 +262,12 @@ describe Blackjack do
     game.dealer.hands[0].add_card(ten_hearts, false)
     game.dealer.hands[0].add_card(ten_spades, false)
 
-    game.evaluate_hand(hand).should eq(Result::LOSE)
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::LOSE)
   end
 
   it 'dealer bust player anything should win' do
     game = Blackjack.new(1)
-    player = Player.new('Brett')
+    player = Player.new('Brett', game.shoe, game.dealer)
     hand = Hand.new
 
     player.place_wager(5)
@@ -287,11 +284,12 @@ describe Blackjack do
     game.dealer.hands[0].add_card(six_spade, false)
     game.dealer.hands[0].add_card(six_spade, false)
 
-    game.evaluate_hand(hand).should eq(Result::WIN)
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::WIN)
   end
 
   it 'dealer should stand on hard 17' do
     game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     seven_hearts = Card.new(Suit::HEART, Value::SEVEN)
@@ -299,6 +297,7 @@ describe Blackjack do
     game.dealer.hands[0].add_card(ten_spades, false)
     game.dealer.hands[0].add_card(seven_hearts, false)
 
+    game.current_round_players.push(player)
     game.play_dealer_hand
 
     game.dealer.hands[0].size.should be == 2
@@ -306,12 +305,15 @@ describe Blackjack do
 
   it 'dealer should hit on 16' do
     game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
 
     ten_spades = Card.new(Suit::SPADE, Value::TEN)
     six_hearts = Card.new(Suit::HEART, Value::SIX)
     game.dealer.new_hands
     game.dealer.hands[0].add_card(six_hearts, false)
     game.dealer.hands[0].add_card(ten_spades, false)
+
+    game.current_round_players.push(player)
 
     game.play_dealer_hand
 
@@ -362,6 +364,8 @@ describe Blackjack do
 
   it 'dealer should hit on soft 17' do
     game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
+    game.current_round_players.push(player)
 
     #Dealer hits after simple soft 17
     ace_spades = Card.new(Suit::SPADE, Value::ACE)

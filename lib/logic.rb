@@ -1,3 +1,5 @@
+require 'move'
+
 class Logic
 
   def self.seventeen_or_above(totals)
@@ -72,6 +74,36 @@ class Logic
 
   def self.is_busted?(hand)
     Logic.get_hand_values(hand).select { |total| total <= 21}.length == 0
+  end
+
+  def self.losing_score(hand)
+    if Logic.is_busted?(hand)
+      Logic.minimum_score(hand)
+    else
+      Logic.max_under_twenty_two(hand)
+    end
+  end
+
+  def self.evaluate_hand(hand, dealer_hand)
+    dealers_totals = Logic.get_hand_values(dealer_hand)
+    player_totals = Logic.get_hand_values(hand)
+    dealer_bust = dealers_totals.min > 21
+    player_bust = player_totals.min > 21
+
+    dealers_best = Logic.max_under_twenty_two(dealer_hand)
+    players_best = Logic.max_under_twenty_two(hand)
+
+    if player_bust
+      return Result::LOSE
+    elsif dealer_bust
+      return Result::WIN
+    elsif dealers_best > players_best
+      return Result::LOSE
+    elsif players_best > dealers_best
+      return Result::WIN
+    elsif players_best == dealers_best
+      return Result::PUSH
+    end
   end
 
   def self.get_card_value(card)

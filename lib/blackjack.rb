@@ -5,11 +5,20 @@ require 'move'
 require 'result'
 require 'print'
 require 'logic'
+require 'wager'
 
 class Blackjack
 
   def dealer
     @dealer
+  end
+
+  def current_round_players
+    @current_round_players
+  end
+
+  def shoe
+    @shoe
   end
 
   #Command line driver
@@ -45,18 +54,14 @@ class Blackjack
     @player_array = []
     @shoe = Shoe.new(6)
     #todo: use dealer class
-    @dealer = Player.new('Dealer')
-
+    @dealer = Player.new('Dealer', @shoe, @dealer)
+    @current_round_players = []
     Print.newline
     num_players.times do
-      initialize_player(@player_array.length)
+      print "Enter player #{@player_array.length}'s name: "
+      player = Player.new(gets.chomp, @shoe, @dealer)
+      @player_array.push(player)
     end
-  end
-
-  def initialize_player(player_num)
-    print "Enter player #{player_num}'s name: "
-    player = Player.new(gets.chomp)
-    @player_array.push(player)
   end
 
   #Main game loop. Exit when all the money is gone
@@ -70,12 +75,17 @@ class Blackjack
   end
 
   def play_round
-    @current_round_players = []
-    @dealer.new_hands
-    get_player_antes
+    reset
+    @current_round_players = Wager.get_player_antes(@player_array)
     deal_cards
     do_all_players_turns
-    resolve_hands
+    play_dealer_hand
+    calculate_results
+  end
+
+  #Reset dealer's hand
+  def reset
+    @dealer.new_hands
   end
 
   #Deal initial cards to all players in the following order
@@ -91,102 +101,6 @@ class Blackjack
     deal_card(@dealer, @shoe.draw, true)
   end
 
-  def resolve_hands
-    play_dealer_hand
-    evalute_all_players_hands
-  end
-
-  def evalute_all_players_hands
-    Print.heading('Results')
-
-    dealer_score(Logic.get_hand_values(@dealer.hands[0]))
-
-    @current_round_players.each do |player|
-      detemine_results(player)
-    end
-  end
-
-  #todo: move to dealer class
-  def play_dealer_hand
-    dealer_hand = @dealer.hands[0]
-    Print.heading('Playing dealer hand!')
-    totals = Logic.get_hand_values(dealer_hand)
-    dealer_score(totals)
-    while !Logic.is_busted?(dealer_hand) && (Logic.seventeen_or_above(totals) == false || Logic.contains_soft_seventeen(dealer_hand))
-      card = @shoe.draw
-      dealer_hand.add_card(card, true)
-      #puts "Dealer draws a #{card}"
-      totals = Logic.get_hand_values(dealer_hand)
-      dealer_score(totals)
-    end
-
-    if Logic.is_busted?(dealer_hand)
-      puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hands[0]).join(',')}"
-    end
-
-  end
-
-  def dealer_score(totals)
-    puts "Dealer has #{@dealer.hands[0]}\nTotals: #{totals.join(',')}"
-  end
-
-  def losing_score(hand)
-    if is_busted?(hand)
-      minimum_score(hand)
-    else
-      max_under_twenty_two(hand)
-    end
-  end
-
-  def detemine_results(player)
-
-    player.hands.each do |hand|
-      result = evaluate_hand(hand)
-      if result == Result::PUSH
-        puts "\n#{player.name} pushes with #{hand}! Final Score: #{max_under_twenty_two(hand)}"
-        player.credit(player.current_wager)
-      elsif result == Result::WIN
-        winnings = player.current_wager * 2
-        puts "\n#{player.name} wins with #{hand}! Final Score: #{max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
-        player.credit(winnings)
-      else
-        puts "\n #{player.name} loses with #{hand}! Final Score: #{losing_score(hand)}"
-      end
-    end
-  end
-
-  def evaluate_hand(hand)
-    dealers_totals = Logic.get_hand_values(@dealer.hands[0])
-    player_totals = Logic.get_hand_values(hand)
-    dealer_bust = dealers_totals.min > 21
-    player_bust = player_totals.min > 21
-    dealers_best = Logic.get_hand_values(@dealer.hands[0]).select { |total| total <= 21}.max
-    players_best = Logic.get_hand_values(hand).select { |total| total <= 21}.max
-
-    if player_bust
-      return Result::LOSE
-    elsif dealer_bust
-      return Result::WIN
-    elsif dealers_best > players_best
-      return Result::LOSE
-    elsif players_best > dealers_best
-      return Result::WIN
-    elsif players_best == dealers_best
-      return Result::PUSH
-    end
-  end
-
-  #Adds the card to a player (does not draw card)
-  def deal_card(player, card, show)
-    if show
-      puts "Dealing to #{player.name}: #{card}"
-    elsif
-      puts "Dealing hidden card to #{player.name}"
-    end
-    player.hands[0].add_card(card, false)
-  end
-
-
   def deal_card_to_players
     @current_round_players.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
@@ -201,155 +115,65 @@ class Blackjack
   def do_all_players_turns
     @current_round_players.length.times do |curr_player_number|
       curr_player = get_player_by_number(curr_player_number)
-      do_player_turn(curr_player)
+      curr_player.play_turn
     end
   end
 
-  def do_player_turn(player)
-    Print.heading("Playing hands for #{player.name}")
+  #todo: move to dealer class
+  def play_dealer_hand
+    if @current_round_players.size > 0
+      Print.heading('Playing dealer hand!')
+      dealer_hand = @dealer.hands[0]
+      totals = Logic.get_hand_values(dealer_hand)
+      Print.player_score(@dealer, dealer_hand, totals)
+      while !Logic.is_busted?(dealer_hand) && (Logic.seventeen_or_above(totals) == false || Logic.contains_soft_seventeen(dealer_hand))
+        card = @shoe.draw
+        dealer_hand.add_card(card, true)
+        #puts "Dealer draws a #{card}"
+        totals = Logic.get_hand_values(dealer_hand)
+        Print.player_score(@dealer, dealer_hand, totals)
+      end
+
+      if Logic.is_busted?(dealer_hand)
+        puts "Dealer busts with #{dealer_hand} values: #{Logic.get_hand_values(@dealer.hands[0]).join(',')}"
+      end
+    end
+  end
+
+  def calculate_results
+    Print.heading('Results')
+    Print.player_score(@dealer, @dealer.hands[0], Logic.get_hand_values(@dealer.hands[0]))
+
+    @current_round_players.each do |player|
+      calculate_results_for_player(player)
+    end
+  end
+
+  def calculate_results_for_player(player)
     player.hands.each do |hand|
-      play_player_hand(player, hand)
-    end
-  end
-
-  def play_player_hand(player, hand)
-    while true
-      puts "#{player.name} has: #{hand} \nTotals: #{Logic.get_hand_values(hand).join(',')}"
-      puts "Dealer shows: #{@dealer.hands[0].cards[1]}"
-      move = get_player_move(player,hand)
-
-      handle_move(player, hand, move)
-      if is_busted?(hand)
-        puts "#{player.name}: Busted! :("
-        Print.newline
-        break
-      elsif move == Move::STAND || move == Move::DOUBLEDOWN
-        break;
+      result = Logic.evaluate_hand(hand, @dealer.hands[0])
+      if result == Result::PUSH
+        puts "\n#{player.name} pushes with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}"
+        player.credit(player.current_wager)
+      elsif result == Result::WIN
+        winnings = player.current_wager * 2
+        puts "\n#{player.name} wins with #{hand}! Final Score: #{Logic.max_under_twenty_two(hand)}\nWinnings: $#{winnings}"
+        player.credit(winnings)
+      else
+        puts "\n #{player.name} loses with #{hand}! Final Score: #{Logic.losing_score(hand)}"
       end
     end
   end
 
-  def get_player_move(player, hand)
-    valid_moves = Logic.compute_valid_moves(player, hand)
-
-    move_invalid = true
-    while move_invalid
-      begin
-        puts "\nEnter the first letter of a move from the list: #{valid_moves.join(' ')}"
-        input_move = gets.chomp
-        move_invalid = invalid_move?(input_move)
-      rescue ArgumentError
-        #Catches non-number input and betting more than you have
-        print "Invalid move #{player.name}, please select a valid move from the list #{valid_moves.join(' ')}: "
-      end
+  #Adds the card to a player (does not draw card)
+  def deal_card(player, card, show)
+    if show
+      puts "Dealing to #{player.name}: #{card}"
+    elsif
+      puts "Dealing hidden card to #{player.name}"
     end
-
-    case input_move.upcase
-      when 'S'
-        return Move::STAND
-      when 'H'
-        return Move::HIT
-      when 'D'
-        return Move::DOUBLEDOWN
-      when 'P'
-        return Move::SPLIT
-      else
-        raise ArgumentError
-    end
-
+    player.hands[0].add_card(card, false)
   end
-
-  def invalid_move?(move)
-    case move.upcase
-      when 'S'
-        return false
-      when 'H'
-        return false
-      when 'D'
-        return false
-      when 'P'
-        return false
-      else
-        return true
-    end
-  end
-
-  def handle_move(player, hand, move)
-    case move
-      when Move::STAND
-        stand(hand, player)
-      when Move::HIT
-        hit(hand, player)
-      when Move::DOUBLEDOWN
-        double_down(hand, player)
-      when Move::SPLIT
-        split_hand(hand, player)
-
-      else
-        raise ArgumentError
-    end
-  end
-
-  def stand(hand, player)
-    puts "#{player.name} stands! Totals: #{Logic.get_hand_values(hand).join(",")}"
-  end
-
-  def hit(hand, player)
-    puts "#{player.name} hits!"
-    player.hit(hand,@shoe)
-  end
-
-  def double_down(hand, player)
-    puts "#{player.name} Double's Down! Good Luck!"
-    player.double_down(hand, @shoe)
-  end
-
-  def split_hand(hand, player)
-    puts "#{player.name} splits! Good Luck!"
-    player.split_hand(hand, @shoe)
-  end
-
-  def get_player_antes
-    Print.heading('Wagers')
-    @player_array.length.times do |curr_player_number|
-      curr_player = get_player_by_number(curr_player_number)
-      wager_amount = get_wager_for_player(curr_player)
-
-      if wager_amount >= 1
-        curr_player.place_wager(wager_amount)
-        curr_player.new_hands
-        @current_round_players.push(curr_player)
-      else
-        puts "#{curr_player.name} abstains"
-      end
-    end
-  end
-
-  def get_wager_for_player(curr_player)
-
-    print "#{curr_player.name} (Bankroll: $#{curr_player.bankroll}) - Enter wager or anything < 1 to abstain: "
-
-    wager_amount, wager_invalid = 0, true
-    while wager_invalid
-      begin
-        wager_amount = Integer(gets.chomp)
-        wager_invalid = invalid_wager?(curr_player, wager_amount)
-      rescue ArgumentError
-        #Catches non-number input and betting more than you have
-        print "Invalid wager #{curr_player.name}, please wager <= $#{curr_player.bankroll}: "
-      end
-    end
-    wager_amount
-  end
-
-
-  def invalid_wager?(curr_player, wager_amount)
-    if wager_amount > curr_player.bankroll
-      raise ArgumentError
-    end
-    false
-  end
-
 
 end
 
