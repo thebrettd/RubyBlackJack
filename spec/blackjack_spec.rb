@@ -408,5 +408,23 @@ describe Blackjack do
     game.dealer.hands[0].size.should be >= 5
   end
 
+  it 'dealer blackjack player blackjack should push' do
+    game = Blackjack.new(1)
+    player = Player.new('Brett', game.shoe, game.dealer)
+    hand = Hand.new
+
+    player.place_wager(5)
+
+    ace_spades = Card.new(Suit::SPADE, Value::ACE)
+    queen_hearts = Card.new(Suit::HEART, Value::QUEEN)
+    hand.add_card(ace_spades, false)
+    hand.add_card(queen_hearts, false)
+
+    game.dealer.new_hands
+    game.dealer.hands[0].add_card(ace_spades, false)
+    game.dealer.hands[0].add_card(queen_hearts, false)
+
+    Logic.evaluate_hand(hand, game.dealer.hands[0]).should eq(Result::LOSE)
+  end
 
 end
